@@ -1,0 +1,58 @@
+[
+  {
+    "id": "pasien-1747449259041",
+    "nama": "Yudha Islami Sulistya",
+    "email": "yudhamaster77@gmail.com",
+    "tanggal_lahir": "2025-05-17",
+    "nik": "7209050902000002",
+    "no_hp": "085340472927",
+    "alamat": "Jl. Sungai Bongka",
+    "wallet": {
+      "address": "0x77C775E94f6b045917F1c6CcAe3776Df630BdF43",
+      "privateKey": "0xeba1f77821f20097c04174166e4c15232ff8f6e0199c2e604e1d88ba406493b8"
+    },
+    "created_at": "2025-05-17T02:34:19.041Z"
+  },
+  {
+    "id": "pasien-1747449491746",
+    "nama": "Kasmira",
+    "email": "kasmira.ira06@gmail.com",
+    "tanggal_lahir": "2000-06-28",
+    "nik": "723232323232323",
+    "no_hp": "085340472927",
+    "alamat": "Jl. Sungai Bongka",
+    "wallet": {
+      "address": "0x4DAf48700b50AcCcdA2DB645e0D3ce0BC9BB04a5",
+      "privateKey": "0xa90ad738852b869d8ed06775c7ca0bccab3746fc3ae84500b99addd45fc57120"
+    },
+    "created_at": "2025-05-17T02:38:11.746Z"
+  },
+  {
+    "id": "pasien-1747449602987",
+    "nama": "Maie",
+    "email": "mae@gmail.com",
+    "tanggal_lahir": "1999-05-01",
+    "nik": "7121712127121271212",
+    "no_hp": "012121212",
+    "alamat": "Jl. Sungai Bongka",
+    "wallet": {
+      "address": "0xaa29292565F7Bb142Ba988F60223f2B19f8C013a",
+      "privateKey": "0xffb4d9059fa6fa757c19561cf6f70a06e53399107677489db176d56097827f16"
+    },
+    "created_at": "2025-05-17T02:40:02.987Z"
+  },
+  {
+    "id": "pasien-1747469572565",
+    "nama": "Yura Zephyr De Sulistya",
+    "email": "yura@gmail.com",
+    "tanggal_lahir": "2000-05-07",
+    "nik": "7209050902000001",
+    "no_hp": "082323232323",
+    "alamat": "Jl. Sungai Bongka",
+    "wallet": {
+      "address": "0x5544549134eF196DB72D678f8A4B5c332dcC1541",
+      "privateKey": "0x6abc27aea069ec23a59002c0f486b335e21b3da4a73c9efe3d4388c278ec1bc2"
+    },
+    "created_at": "2025-05-17T08:12:52.565Z"
+  }
+]
