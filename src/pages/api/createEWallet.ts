@@ -18,12 +18,9 @@ type Pasien = {
     created_at: string;
 };
 
-const DATA_FILE = path.resolve(process.cwd(), "data", "pasien_wallets.json");
+const DATA_FILE = path.resolve(process.cwd(), "public", "data", "pasien_wallets.json");
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-    console.log("Received request to create wallet for pasien");
-    console.log("Request body:", req.body);
-    console.log("Request method:", req.method);
     if (req.method !== "POST") {
         return res.status(405).json({ message: "Method Not Allowed" });
     }

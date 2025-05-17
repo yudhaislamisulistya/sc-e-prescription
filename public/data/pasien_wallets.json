@@ -54,5 +54,33 @@
       "privateKey": "0x6abc27aea069ec23a59002c0f486b335e21b3da4a73c9efe3d4388c278ec1bc2"
     },
     "created_at": "2025-05-17T08:12:52.565Z"
+  },
+  {
+    "id": "pasien-1747471307045",
+    "nama": "Agus Shiab",
+    "email": "agus@gmail.com",
+    "tanggal_lahir": "2023-02-09",
+    "nik": "89892323298923232",
+    "no_hp": "082323232323",
+    "alamat": "Agus Jalan",
+    "wallet": {
+      "address": "0xc5b5d0deda9fA42568Ec71A69C242b43Ae729f9a",
+      "privateKey": "0x1fd85105895bccc0c3520e1266fedd717233539bcae24bd8c197d7fc7dce982f"
+    },
+    "created_at": "2025-05-17T08:41:47.045Z"
+  },
+  {
+    "id": "pasien-1747472066612",
+    "nama": "Monkey D. Luffy",
+    "email": "monkey@gmail.com",
+    "tanggal_lahir": "2001-02-09",
+    "nik": "72309090923209092",
+    "no_hp": "08523232422",
+    "alamat": "Jl. Bongka",
+    "wallet": {
+      "address": "0xaa620D02c0Be07F2304E46b0FCcdd3D9a2083E82",
+      "privateKey": "0x1938dc19353fba5285082192841b50713149a37c2c8d3173ae86126e0cf916d4"
+    },
+    "created_at": "2025-05-17T08:54:26.612Z"
   }
 ]

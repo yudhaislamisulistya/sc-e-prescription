@@ -3,6 +3,11 @@ import PatientInput from './PatientInput';
 import SubmitButton from './SubmitButton';
 import LoadingSpinner from '../common/LoadingSpinner';
 
+type PatientFormProps = {
+  reloadPatients: () => void;
+};
+
+
 type PatientData = {
     nama: string;
     email: string;
@@ -21,7 +26,7 @@ const defaultData: PatientData = {
     alamat: ''
 };
 
-const PatientForm: React.FC = () => {
+const PatientForm: React.FC<PatientFormProps> = ({ reloadPatients }) => {
     const [formData, setFormData] = useState<PatientData>(defaultData);
     const [loading, setLoading] = useState(false);
 
@@ -53,6 +58,7 @@ const PatientForm: React.FC = () => {
             alert("Terjadi kesalahan saat menyimpan data pasien");
         }
         setLoading(false);
+        reloadPatients();
     };
 
     return (

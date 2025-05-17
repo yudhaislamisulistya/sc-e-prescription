@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import DoctorLayout from "@/layouts/DoctorLayout";
 import PatientForm from "@/components/patient/PatientForm";
-import pasienData from "../../../data/pasien_wallets.json";
 import CopyButtonWithToast from "@/components/common/CopyButtonWithToast";
 
 type Pasien = {
@@ -23,13 +22,20 @@ type Pasien = {
 const CreatePatientPage: React.FC = () => {
   const [selectedPatient, setSelectedPatient] = useState<Pasien | null>(null);
   const [patients, setPatients] = useState<Pasien[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [filteredPatients, setFilteredPatients] = useState(patients);
 
+  const loadPatients = () => {
+    fetch("/data/pasien_wallets.json")
+      .then((res) => res.json())
+      .then((data) => setPatients(data))
+      .catch(console.error);
+  };
+
   useEffect(() => {
-    setPatients(pasienData);
+    loadPatients();
   }, []);
-  
+
   useEffect(() => {
     if (searchTerm.length >= 3) {
       const term = searchTerm.toLowerCase();
@@ -42,10 +48,6 @@ const CreatePatientPage: React.FC = () => {
     }
   }, [searchTerm, patients]);
 
-
-
-
-
   return (
     <DoctorLayout>
       <h1 className="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
@@ -55,12 +57,14 @@ const CreatePatientPage: React.FC = () => {
       <div className="flex gap-8">
         {/* Form Section */}
         <div className="flex-1 basis-8/12 bg-zinc-900 p-6 rounded-xl shadow-lg bg-gradient-to-br from-gray-800 via-zinc-900 to-black">
-          <PatientForm />
+          <PatientForm reloadPatients={loadPatients} />
         </div>
 
         {/* Sidebar Section */}
         <aside className="flex-1 basis-4/12 bg-zinc-800 rounded-xl shadow-lg p-6 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900">
-          <h2 className="text-xl font-semibold mb-4 text-zinc-300">Patient List</h2>
+          <h2 className="text-xl font-semibold mb-4 text-zinc-300">
+            Patient List
+          </h2>
 
           {/* Search Input */}
           <div className="mb-6">
@@ -144,7 +148,9 @@ const CreatePatientPage: React.FC = () => {
                 <span className="truncate">
                   {selectedPatient.wallet.address}
                 </span>
-                <CopyButtonWithToast valueToCopy={selectedPatient.wallet.address} />
+                <CopyButtonWithToast
+                  valueToCopy={selectedPatient.wallet.address}
+                />
               </div>
 
               {/* Masked Private Key */}
