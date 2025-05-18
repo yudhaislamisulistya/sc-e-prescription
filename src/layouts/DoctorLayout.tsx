@@ -23,7 +23,7 @@ const DoctorLayout: React.FC<DoctorLayoutProps> = ({ children }) => {
 
     return (
         <div className="min-h-screen flex flex-col">
-            <DoctorHeader doctorName="Dr. Andi Setiawan" onLogout={handleLogout} />
+            <DoctorHeader doctorName="Dr. Yudha Islami Sulistya" onLogout={handleLogout} />
             <main className="flex-grow p-6">{children}</main>
             <DoctorFooter />
         </div>

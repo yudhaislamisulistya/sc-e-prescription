@@ -1,22 +1,41 @@
-import { useState } from "react";
-import Select from "react-select";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect } from "react";
+import LoadingSpinner from "../common/LoadingSpinner";
+import dynamic from 'next/dynamic';
+
+const Select = dynamic(() => import('react-select'), { ssr: false });
 
 type Patient = {
+    id: string;
     nama: string;
-    walletAddress: string;
+    email: string;
+    tanggal_lahir: string;
+    nik: string;
+    no_hp: string;
+    alamat: string;
+    wallet: {
+        address: string;
+        privateKey: string;
+    };
+    created_at: string;
 };
-
-const patients: Patient[] = [
-    { nama: "Monkey D. Luffy", walletAddress: "0x123...abc" },
-    { nama: "Roronoa Zoro", walletAddress: "0x456...def" },
-    { nama: "Nami", walletAddress: "0x789...ghi" },
-    // isi data pasien lainnya
-];
 
 export default function PrescriptionForm() {
     const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+    const [patients, setPatients] = useState<Patient[]>([]);
     const [prescriptionText, setPrescriptionText] = useState("");
     const [loading, setLoading] = useState(false);
+
+    const loadPatients = () => {
+        fetch("/data/pasien_wallets.json")
+            .then((res) => res.json())
+            .then((data) => setPatients(data))
+            .catch(console.error);
+    };
+
+    useEffect(() => {
+        loadPatients();
+    }, []);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -30,7 +49,7 @@ export default function PrescriptionForm() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    patient: selectedPatient.walletAddress,
+                    patient: selectedPatient.wallet.address,
                     medication: prescriptionText,
                 }),
             });
@@ -40,8 +59,7 @@ export default function PrescriptionForm() {
             if (!res.ok) throw new Error(data.error || "Terjadi kesalahan");
 
             alert(
-                `Resep berhasil disimpan!\nCID: ${data.cid}\nTxHash: ${data.tx.transactionHash || JSON.stringify(data.tx)
-                }`
+                `Resep berhasil disimpan!\nCID: ${data.cid}\nTxHash: ${data.tx}\nID: ${data.id}\nDoctor Address: ${data.doctorAddress}\nPatient Address: ${data.patientAddress}`
             );
         } catch (error) {
             console.error(error);
@@ -51,7 +69,7 @@ export default function PrescriptionForm() {
     }
 
     const options = patients.map((p) => ({
-        value: p.walletAddress,
+        value: p.wallet.address,
         label: p.nama,
     }));
 
@@ -60,19 +78,19 @@ export default function PrescriptionForm() {
             onSubmit={handleSubmit}
             className="mx-auto p-6 shadow-lg rounded-lg"
         >
-            <h2 className="text-2xl font-bold mb-6 text-white">Buat Resep Baru</h2>
+            <h2 className="text-2xl font-bold mb-6">Create New Prescription</h2>
 
             <label className="block text-white font-semibold mb-2">Pilih Pasien</label>
             <Select
                 options={options}
-                onChange={(option) =>
-                    setSelectedPatient(
-                        option ? { nama: option.label, walletAddress: option.value } : null
-                    )
-                }
-                placeholder="Cari nama pasien..."
+                onChange={(option: any): void => {
+                    const selected = patients.find(p => p.wallet.address === option?.value);
+                    setSelectedPatient(selected || null);
+                }}
+                placeholder="Search for a patient..."
                 className="mb-2"
                 isClearable
+                required
                 styles={{
                     control: (base, state) => ({
                         ...base,
@@ -124,31 +142,31 @@ export default function PrescriptionForm() {
             {selectedPatient && (
                 <p className="text-white mt-1 text-sm">
                     Wallet Address:{" "}
-                    <span className="font-mono">{selectedPatient.walletAddress}</span>
+                    <span className="font-mono">{selectedPatient.wallet.address}</span>
                 </p>
             )}
 
             <label className="block text-white font-semibold mt-6 mb-2">Isi Resep</label>
             <textarea
-                placeholder="Tulis isi resep..."
+                placeholder="Enter prescription details here..."
                 value={prescriptionText}
                 onChange={(e) => setPrescriptionText(e.target.value)}
                 required
                 rows={5}
-                className="w-full bg-gradient-to-r from-gray-900 via-zinc-800 to-gray-900 text-white border border-zinc-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-4 focus:ring-indigo-500 transition resize-none"
+                className="w-full bg-gradient-to-r from-gray-900 via-zinc-800 to-gray-900 text-white border border-zinc-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-4 focus:ring-indigo-500 transition resize-none mb-2"
             />
+            {loading ? (
+                <LoadingSpinner />
+            ) : (
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="mt-6 w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-semibold px-5 py-3 rounded-lg shadow-lg hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 transition"
+                >
+                    Save Recipe
+                </button>
+            )}
 
-            <button
-                type="submit"
-                disabled={loading}
-                className={`mt-6 w-full px-6 py-3 rounded-lg font-bold text-white transition 
-                ${loading
-                        ? "bg-gray-500 cursor-not-allowed"
-                        : "bg-gradient-to-r from-pink-500 via-red-500 to-yellow-400 hover:from-pink-600 hover:via-red-600 hover:to-yellow-500"
-                    }`}
-            >
-                {loading ? "Menyimpan..." : "Simpan Resep"}
-            </button>
         </form>
     );
 }
