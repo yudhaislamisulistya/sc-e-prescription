@@ -80,7 +80,7 @@ export default function PrescriptionForm() {
         >
             <h2 className="text-2xl font-bold mb-6">Create New Prescription</h2>
 
-            <label className="block text-white font-semibold mb-2">Pilih Pasien</label>
+            <label className="block text-white font-semibold mb-2">Choose Patient</label>
             <Select
                 options={options}
                 onChange={(option: any): void => {
@@ -146,7 +146,7 @@ export default function PrescriptionForm() {
                 </p>
             )}
 
-            <label className="block text-white font-semibold mt-6 mb-2">Isi Resep</label>
+            <label className="block text-white font-semibold mt-6 mb-2">Prescription Details</label>
             <textarea
                 placeholder="Enter prescription details here..."
                 value={prescriptionText}
