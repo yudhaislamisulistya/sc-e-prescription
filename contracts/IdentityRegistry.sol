@@ -97,13 +97,7 @@ contract IdentityRegistry is AccessControl {
     }
 
     function isAuthorized(bytes32 role, address account) external view returns (bool) {
-        // Cross-check the stored canonical role (defense in depth alongside the
-        // revoke in registerActor) so authorization can never be granted for a
-        // role the actor is no longer registered under.
-        return
-            hasRole(role, account) &&
-            _actors[account].role == role &&
-            _actors[account].status == ActorStatus.Active;
+        return hasRole(role, account) && _actors[account].status == ActorStatus.Active;
     }
 
     function getEncryptionPubKeyByAddress(address actor) external view returns (bytes memory) {

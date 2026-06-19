@@ -170,6 +170,20 @@ describe("IdentityRegistry", function () {
     ).to.be.true;
   });
 
+  it("admin (constructor-granted, never run through registerActor) is authorized for ADMIN_ROLE", async () => {
+    // Regression guard: the admin receives ADMIN_ROLE only via the constructor's
+    // _grantRole and is never put through registerActor, so _actors[admin].role
+    // stays bytes32(0). isAuthorized(ADMIN_ROLE, admin) MUST still return true —
+    // downstream contracts (PrescriptionRegistry.revoke, KeyAccessRegistry
+    // grant/revokeAccess) gate the admin emergency paths on exactly this call.
+    const { registry, admin } = await deploy();
+    const ADMIN_ROLE = await registry.read.ADMIN_ROLE();
+
+    expect(
+      await registry.read.isAuthorized([ADMIN_ROLE, admin.account.address])
+    ).to.be.true;
+  });
+
   it("admin can register a patient custodian actor", async () => {
     const { registry, admin, custodian } = await deploy();
     const licenseHash = `0x${"ab".repeat(32)}` as `0x${string}`;
