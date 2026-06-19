@@ -152,6 +152,40 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# 2b. Wire P2P peering: write static-nodes.json so besu-rpc dials the validator.
+#
+# WITHOUT this, the two Besu containers never discover each other on the Docker
+# bridge network, the RPC node stays on an empty fork, and the app/indexer see
+# zero blocks. The validator's node public key (its enode id) is only known
+# AFTER key generation, which is why this is produced here rather than committed.
+#
+# The enode host uses the docker-compose service DNS name "besu-validator"
+# (resolvable on consortium-net); both TOML configs enable DNS so the name is
+# resolved to the container IP at dial time.
+# ---------------------------------------------------------------------------
+STATIC_NODES_DST="${SCRIPT_DIR}/static-nodes.json"
+VALIDATOR_P2P_PORT="30303"
+VALIDATOR_DNS_HOST="besu-validator"
+if [ -f "${STATIC_NODES_DST}" ]; then
+  echo "==> static-nodes.json already present at ${STATIC_NODES_DST} (not overwriting)."
+else
+  PUB_FILE="$(find "${OUT_DIR}/keys" -name 'key.pub' -type f 2>/dev/null | head -n1 || true)"
+  if [ -n "${PUB_FILE}" ]; then
+    # key.pub is the 0x-prefixed 64-byte uncompressed node id; the enode drops 0x.
+    NODE_PUB="$(tr -d '[:space:]' <"${PUB_FILE}")"
+    NODE_ID="${NODE_PUB#0x}"
+    ENODE="enode://${NODE_ID}@${VALIDATOR_DNS_HOST}:${VALIDATOR_P2P_PORT}"
+    printf '[\n  "%s"\n]\n' "${ENODE}" >"${STATIC_NODES_DST}"
+    echo "==> Wrote static-nodes.json -> ${STATIC_NODES_DST}"
+    echo "    enode: ${ENODE}"
+  else
+    echo "WARN: could not locate key.pub under ${OUT_DIR}/keys; static-nodes.json not written." >&2
+    echo "      besu-rpc will NOT peer with the validator until you create" >&2
+    echo "      ${STATIC_NODES_DST} (see static-nodes.json.example)." >&2
+  fi
+fi
+
+# ---------------------------------------------------------------------------
 # 3. Extract the IBFT extraData from the generated genesis.
 # ---------------------------------------------------------------------------
 EXTRA_DATA=""
@@ -235,8 +269,13 @@ fi
 
 echo
 echo "Generated artifacts (all gitignored — never commit private keys):"
-echo "  - validator key      : ${VALIDATOR_KEY_DST}"
+echo "  - validator key       : ${VALIDATOR_KEY_DST}"
 echo "  - deployer key        : ${DEPLOYER_KEY_FILE}"
 echo "  - operator-tool output: ${OUT_DIR}/ (genesis.json + keys/)"
+echo "  - static-nodes.json   : ${STATIC_NODES_DST} (besu-rpc -> validator peering)"
+echo
+echo "These paths are gitignored (see .gitignore: infra/besu/validator-key,"
+echo "deployer-private-key.txt, networkFiles/, ibftConfigFile.json, static-nodes.json)."
+echo "Verify with: git check-ignore infra/besu/validator-key"
 echo
 echo "Done."

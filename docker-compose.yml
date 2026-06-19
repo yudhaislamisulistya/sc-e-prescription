@@ -14,6 +14,14 @@
 # provided by other tasks / by the operator at deploy time. The secrets/
 # directory is committed empty (.gitkeep) and gitignored — real secret values
 # must never be committed.
+#
+# Postgres credentials: the database password is supplied via the
+# POSTGRES_PASSWORD environment variable (set it in the gitignored .env file,
+# e.g. `POSTGRES_PASSWORD=change-me`). It is used BOTH to initialise the
+# Postgres server AND inside every consumer's DATABASE_URL, so the URL and the
+# server password always come from a single source — no "password
+# authentication failed" mismatch. A default is provided only so the stack can
+# boot for local dev; override it for any real deployment.
 # ---------------------------------------------------------------------------
 version: "3.8"
 
@@ -41,6 +49,11 @@ services:
     volumes:
       - ./infra/besu/besu-rpc.toml:/cfg/besu-rpc.toml:ro
       - ./infra/besu/genesis.json:/cfg/genesis.json:ro
+      # Static peering: Besu auto-loads static-nodes.json from its data-path
+      # (/data/besu-rpc) so this RPC node dials the validator and receives sealed
+      # blocks. Generated host-side by `bash infra/besu/generate-keys.sh`
+      # (gitignored, host-specific enode). Without it the RPC node never peers.
+      - ./infra/besu/static-nodes.json:/data/besu-rpc/static-nodes.json:ro
       - besu-rpc-data:/data
     ports:
       - "8545:8545"
@@ -55,12 +68,13 @@ services:
     environment:
       POSTGRES_DB: eprescription
       POSTGRES_USER: app
-      POSTGRES_PASSWORD_FILE: /run/secrets/pg_password
+      # Single source of truth for the DB password (see header). The same value
+      # is interpolated into every consumer's DATABASE_URL below.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eprescription}
     volumes:
       - pg-data:/var/lib/postgresql/data
       - ./services/indexer/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
     networks: [app-net]
-    secrets: [pg_password]
     restart: unless-stopped
 
   # --- Cache / queue ----------------------------------------------------------
@@ -109,7 +123,7 @@ services:
     container_name: epx-indexer
     environment:
       RPC_URL: http://besu-rpc:8545
-      DATABASE_URL: postgres://app@postgres/eprescription
+      DATABASE_URL: postgres://app:${POSTGRES_PASSWORD:-eprescription}@postgres/eprescription
       REDIS_URL: redis://redis:6379
     depends_on: [besu-rpc, postgres]
     networks: [app-net]
@@ -123,7 +137,7 @@ services:
     container_name: epx-kms-signer
     environment:
       RPC_URL: http://besu-rpc:8545
-      DATABASE_URL: postgres://app@postgres/eprescription
+      DATABASE_URL: postgres://app:${POSTGRES_PASSWORD:-eprescription}@postgres/eprescription
       PORT: "4000"
     depends_on: [besu-rpc, postgres]
     networks: [app-net]
@@ -138,7 +152,7 @@ services:
       NODE_ENV: production
       NEXT_PUBLIC_CHAIN_ID: "1337"
       RPC_URL: http://besu-rpc:8545
-      DATABASE_URL: postgres://app@postgres/eprescription
+      DATABASE_URL: postgres://app:${POSTGRES_PASSWORD:-eprescription}@postgres/eprescription
       REDIS_URL: redis://redis:6379
       IPFS_API_URL: http://ipfs:5001
       IPFS_GATEWAY_URL: http://ipfs:8080
@@ -163,8 +177,9 @@ volumes:
   ipfs-cluster-data: {}
 
 secrets:
-  pg_password:
-    file: ./secrets/pg_password.txt
+  # Postgres password is provided via the POSTGRES_PASSWORD env var (see the
+  # header note), not a file secret, so the same value can be interpolated into
+  # every consumer's DATABASE_URL without code changes.
   kms_service_key:
     file: ./secrets/kms_service_key.txt
   ipfs_cluster_secret:

@@ -11,6 +11,17 @@ genesis-file = "/cfg/genesis.json"
 # P2P (distinct port from the validator so both can run side-by-side).
 p2p-port = 30304
 
+# Peering: this member node must dial the validator to receive sealed blocks.
+# The validator enode is host-specific (it embeds the validator node id, known
+# only after key generation), so generate-keys.sh writes a static-nodes.json
+# which docker-compose mounts into this node's data-path
+# (/data/besu-rpc/static-nodes.json) — Besu auto-loads it from there.
+# The enode host is the compose service DNS name "besu-validator"; enable DNS so
+# Besu resolves it to the container IP at dial time.
+Xdns-enabled = true
+Xdns-update-enabled = true
+host-allowlist = ["*"]
+
 # JSON-RPC
 rpc-http-enabled = true
 rpc-http-host = "0.0.0.0"

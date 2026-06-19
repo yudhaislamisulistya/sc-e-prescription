@@ -15,6 +15,12 @@ node-private-key-file = "/cfg/key"
 # P2P
 p2p-port = 30303
 
+# Enable DNS so peers (besu-rpc) that dial this node via the compose service
+# DNS name "besu-validator" resolve correctly on consortium-net.
+Xdns-enabled = true
+Xdns-update-enabled = true
+host-allowlist = ["*"]
+
 # JSON-RPC disabled on the validator (sealing node only).
 rpc-http-enabled = false
 
