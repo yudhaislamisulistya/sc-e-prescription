@@ -25,6 +25,26 @@ describe("Deploy (Ignition module)", function () {
       keyAccessRegistry.address.toLowerCase(),
     ]);
     expect(addrs.size).to.equal(3);
+
+    // Cross-wiring: read back the constructor-injected immutables and assert
+    // each registry points at the right sibling. Without these, swapping the
+    // KeyAccessRegistry args to [prescriptionRegistry, identityRegistry] would
+    // still deploy three distinct addresses and pass — defeating the test.
+    const prIdentity = (await prescriptionRegistry.read.identityRegistry()) as `0x${string}`;
+    expect(prIdentity.toLowerCase(), "prescriptionRegistry.identityRegistry()").to.equal(
+      identityRegistry.address.toLowerCase()
+    );
+
+    const karIdentity = (await keyAccessRegistry.read.identityRegistry()) as `0x${string}`;
+    expect(karIdentity.toLowerCase(), "keyAccessRegistry.identityRegistry()").to.equal(
+      identityRegistry.address.toLowerCase()
+    );
+
+    const karPrescription = (await keyAccessRegistry.read.prescriptionRegistry()) as `0x${string}`;
+    expect(
+      karPrescription.toLowerCase(),
+      "keyAccessRegistry.prescriptionRegistry()"
+    ).to.equal(prescriptionRegistry.address.toLowerCase());
   });
 
   it("grants ADMIN_ROLE on IdentityRegistry to the default admin", async () => {
