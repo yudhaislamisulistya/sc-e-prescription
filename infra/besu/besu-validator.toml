@@ -1,0 +1,24 @@
+# infra/besu/besu-validator.toml
+#
+# Hyperledger Besu IBFT 2.0 validator node config (consortium / free-gas).
+# Mounted into the besu-validator container at /cfg/besu-validator.toml.
+# This node seals blocks but does NOT expose a public JSON-RPC endpoint;
+# all external RPC traffic goes through the besu-rpc node instead.
+
+data-path = "/data/besu"
+genesis-file = "/cfg/genesis.json"
+
+# Validator signing key (one of the addresses encoded in genesis extraData).
+# Mounted read-only from ./infra/besu/validator-key on the host (gitignored).
+node-private-key-file = "/cfg/key"
+
+# P2P
+p2p-port = 30303
+
+# JSON-RPC disabled on the validator (sealing node only).
+rpc-http-enabled = false
+
+# Free-gas consortium: accept zero-price transactions.
+min-gas-price = 0
+
+logging = "INFO"

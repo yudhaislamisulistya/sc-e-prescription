@@ -1,13 +1,171 @@
-version: "3.9"
+# docker-compose.yml
+# ---------------------------------------------------------------------------
+# Smart-contract e-prescription consortium stack.
+#
+# Hyperledger Besu IBFT 2.0 (free-gas: min-gas-price=0 / gasPrice 0) +
+# Postgres read-model, Redis, IPFS (encrypted-blob storage), an event indexer,
+# a KMS signer service, and the Next.js app.
+#
+# Before first boot, generate validator/deployer keys and substitute the
+# genesis placeholders:  bash infra/besu/generate-keys.sh
+# (genesis.json ships with JSON-valid placeholder strings so it still parses.)
+#
+# NOTE: services/* build contexts (indexer, kms-signer) and secrets/*.txt are
+# provided by other tasks / by the operator at deploy time. The secrets/
+# directory is committed empty (.gitkeep) and gitignored — real secret values
+# must never be committed.
+# ---------------------------------------------------------------------------
+version: "3.8"
 
 services:
-  app:
+  # --- Blockchain: sealing validator (no public RPC) --------------------------
+  besu-validator:
+    image: hyperledger/besu:24.10
+    container_name: epx-besu-validator
+    command: ["--config-file=/cfg/besu-validator.toml"]
+    volumes:
+      - ./infra/besu/besu-validator.toml:/cfg/besu-validator.toml:ro
+      - ./infra/besu/genesis.json:/cfg/genesis.json:ro
+      - ./infra/besu/validator-key:/cfg/key:ro
+      - besu-validator-data:/data
+    ports:
+      - "30303:30303"
+    networks: [consortium-net]
+    restart: unless-stopped
+
+  # --- Blockchain: JSON-RPC member node (free-gas, app-facing) ----------------
+  besu-rpc:
+    image: hyperledger/besu:24.10
+    container_name: epx-besu-rpc
+    command: ["--config-file=/cfg/besu-rpc.toml"]
+    volumes:
+      - ./infra/besu/besu-rpc.toml:/cfg/besu-rpc.toml:ro
+      - ./infra/besu/genesis.json:/cfg/genesis.json:ro
+      - besu-rpc-data:/data
+    ports:
+      - "8545:8545"
+    networks: [consortium-net, app-net]
+    depends_on: [besu-validator]
+    restart: unless-stopped
+
+  # --- Read-model database ----------------------------------------------------
+  postgres:
+    image: postgres:16
+    container_name: epx-postgres
+    environment:
+      POSTGRES_DB: eprescription
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD_FILE: /run/secrets/pg_password
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - ./services/indexer/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    networks: [app-net]
+    secrets: [pg_password]
+    restart: unless-stopped
+
+  # --- Cache / queue ----------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: epx-redis
+    networks: [app-net]
+    restart: unless-stopped
+
+  # --- Off-chain encrypted blob storage --------------------------------------
+  ipfs:
+    image: ipfs/kubo:v0.26.0
+    container_name: epx-ipfs
+    volumes:
+      - ipfs-data:/data/ipfs
+    ports:
+      - "5001:5001"
+      - "8080:8080"
+    networks: [app-net]
+    restart: unless-stopped
+
+  # --- IPFS pinning cluster (OPTIONAL: enable with `--profile cluster`) -------
+  ipfs-cluster:
+    image: ipfs/ipfs-cluster:v1.0.8
+    container_name: epx-ipfs-cluster
+    profiles: ["cluster"]
+    environment:
+      CLUSTER_PEERNAME: epx-cluster-0
+      CLUSTER_IPFSHTTP_NODEMULTIADDRESS: /dns4/ipfs/tcp/5001
+      CLUSTER_RESTAPI_HTTPLISTENMULTIADDRESS: /ip4/0.0.0.0/tcp/9094
+      CLUSTER_SECRET_FILE: /run/secrets/ipfs_cluster_secret
+    volumes:
+      - ipfs-cluster-data:/data/ipfs-cluster
+    ports:
+      - "9094:9094"
+    depends_on: [ipfs]
+    networks: [app-net]
+    secrets: [ipfs_cluster_secret]
+    restart: unless-stopped
+
+  # --- Chain -> Postgres event indexer ---------------------------------------
+  indexer:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: sc-e-prescription-app
-    ports:
-      - "3000:3000"
+      dockerfile: services/indexer/Dockerfile
+    container_name: epx-indexer
+    environment:
+      RPC_URL: http://besu-rpc:8545
+      DATABASE_URL: postgres://app@postgres/eprescription
+      REDIS_URL: redis://redis:6379
+    depends_on: [besu-rpc, postgres]
+    networks: [app-net]
+    restart: unless-stopped
+
+  # --- Custodial signer (server-side key custody) -----------------------------
+  kms-signer:
+    build:
+      context: .
+      dockerfile: services/kms-signer/Dockerfile
+    container_name: epx-kms-signer
+    environment:
+      RPC_URL: http://besu-rpc:8545
+      DATABASE_URL: postgres://app@postgres/eprescription
+      PORT: "4000"
+    depends_on: [besu-rpc, postgres]
+    networks: [app-net]
+    secrets: [kms_service_key]
+    restart: unless-stopped
+
+  # --- Next.js application -----------------------------------------------------
+  nextjs-app:
+    build: .
+    container_name: epx-nextjs-app
     environment:
       NODE_ENV: production
+      NEXT_PUBLIC_CHAIN_ID: "1337"
+      RPC_URL: http://besu-rpc:8545
+      DATABASE_URL: postgres://app@postgres/eprescription
+      REDIS_URL: redis://redis:6379
+      IPFS_API_URL: http://ipfs:5001
+      IPFS_GATEWAY_URL: http://ipfs:8080
+      KMS_SIGNER_URL: http://kms-signer:4000
+    ports:
+      - "3000:3000"
+    depends_on: [besu-rpc, postgres, redis, indexer]
+    networks: [app-net]
     restart: unless-stopped
+
+networks:
+  consortium-net:
+    driver: bridge
+  app-net:
+    driver: bridge
+
+volumes:
+  besu-validator-data: {}
+  besu-rpc-data: {}
+  pg-data: {}
+  ipfs-data: {}
+  ipfs-cluster-data: {}
+
+secrets:
+  pg_password:
+    file: ./secrets/pg_password.txt
+  kms_service_key:
+    file: ./secrets/kms_service_key.txt
+  ipfs_cluster_secret:
+    file: ./secrets/ipfs_cluster_secret.txt
