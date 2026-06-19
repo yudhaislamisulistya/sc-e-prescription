@@ -113,6 +113,63 @@ describe("IdentityRegistry", function () {
     ).to.be.true;
   });
 
+  it("re-registering an actor with a different role revokes the old role's authorization", async () => {
+    const { registry, admin, doctor } = await deploy();
+    const licenseHash = `0x${"ab".repeat(32)}` as `0x${string}`;
+    const institutionId = `0x${"cd".repeat(32)}` as `0x${string}`;
+    const encPubKey = "0x04" + "aa".repeat(64);
+    const DOCTOR_ROLE = await registry.read.DOCTOR_ROLE();
+    const PHARMACIST_ROLE = await registry.read.PHARMACIST_ROLE();
+
+    // Register the same address as a DOCTOR first.
+    await registry.write.registerActor(
+      [doctor.account.address, DOCTOR_ROLE, licenseHash, institutionId, encPubKey as `0x${string}`],
+      { account: admin.account }
+    );
+    expect(
+      await registry.read.isAuthorized([DOCTOR_ROLE, doctor.account.address])
+    ).to.be.true;
+
+    // Re-register the SAME address as a PHARMACIST (role change).
+    await registry.write.registerActor(
+      [doctor.account.address, PHARMACIST_ROLE, licenseHash, institutionId, encPubKey as `0x${string}`],
+      { account: admin.account }
+    );
+
+    // The stale DOCTOR authorization MUST be gone; only PHARMACIST remains.
+    expect(
+      await registry.read.isAuthorized([DOCTOR_ROLE, doctor.account.address])
+    ).to.be.false;
+    expect(
+      await registry.read.hasRole([DOCTOR_ROLE, doctor.account.address])
+    ).to.be.false;
+    expect(
+      await registry.read.isAuthorized([PHARMACIST_ROLE, doctor.account.address])
+    ).to.be.true;
+  });
+
+  it("re-registering an actor with the SAME role keeps authorization", async () => {
+    const { registry, admin, doctor } = await deploy();
+    const licenseHash = `0x${"ab".repeat(32)}` as `0x${string}`;
+    const institutionId = `0x${"cd".repeat(32)}` as `0x${string}`;
+    const encPubKey = "0x04" + "aa".repeat(64);
+    const DOCTOR_ROLE = await registry.read.DOCTOR_ROLE();
+
+    await registry.write.registerActor(
+      [doctor.account.address, DOCTOR_ROLE, licenseHash, institutionId, encPubKey as `0x${string}`],
+      { account: admin.account }
+    );
+    // Re-register with the same role (e.g. to rotate the pubkey).
+    await registry.write.registerActor(
+      [doctor.account.address, DOCTOR_ROLE, licenseHash, institutionId, encPubKey as `0x${string}`],
+      { account: admin.account }
+    );
+
+    expect(
+      await registry.read.isAuthorized([DOCTOR_ROLE, doctor.account.address])
+    ).to.be.true;
+  });
+
   it("admin can register a patient custodian actor", async () => {
     const { registry, admin, custodian } = await deploy();
     const licenseHash = `0x${"ab".repeat(32)}` as `0x${string}`;

@@ -53,6 +53,17 @@ contract IdentityRegistry is AccessControl {
             "IR: invalid role"
         );
         require(encryptionPubKey.length > 0, "IR: empty pubkey");
+
+        // Re-registration must overwrite cleanly: if this actor previously held
+        // a DIFFERENT role, revoke that stale OZ role so it can no longer pass
+        // isAuthorized() for the old role. Without this, _grantRole only ever
+        // adds roles and the actor would retain authorization for every role
+        // they were ever registered as.
+        bytes32 previousRole = _actors[actor].role;
+        if (previousRole != bytes32(0) && previousRole != role) {
+            _revokeRole(previousRole, actor);
+        }
+
         _grantRole(role, actor);
         _actors[actor] = Actor({
             licenseHash:      licenseHash,
@@ -86,7 +97,13 @@ contract IdentityRegistry is AccessControl {
     }
 
     function isAuthorized(bytes32 role, address account) external view returns (bool) {
-        return hasRole(role, account) && _actors[account].status == ActorStatus.Active;
+        // Cross-check the stored canonical role (defense in depth alongside the
+        // revoke in registerActor) so authorization can never be granted for a
+        // role the actor is no longer registered under.
+        return
+            hasRole(role, account) &&
+            _actors[account].role == role &&
+            _actors[account].status == ActorStatus.Active;
     }
 
     function getEncryptionPubKeyByAddress(address actor) external view returns (bytes memory) {
