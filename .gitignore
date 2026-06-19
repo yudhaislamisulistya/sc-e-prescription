@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -12,6 +13,7 @@
 
 # testing
 /coverage
+/coverage.json
 
 # next.js
 /.next/
@@ -32,6 +34,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+.env
 
 # vercel
 .vercel
@@ -40,36 +43,18 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-node_modules
-.env
-
 # Hardhat files
 /cache
+/artifacts
 
 # TypeChain files
 /typechain
 /typechain-types
 
-# solidity-coverage files
-/coverage
-/coverage.json
-
 # Hardhat Ignition default folder for deployments against a local node
 ignition/deployments/chain-31337
 
-node_modules
-.env
-
-# Hardhat files
-/cache
-
-# TypeChain files
-/typechain
-/typechain-types
-
-# solidity-coverage files
-/coverage
-/coverage.json
-
-# Hardhat Ignition default folder for deployments against a local node
-ignition/deployments/chain-31337
+# Sensitive data — never commit (V1 containment)
+public/data/*.json
+secrets/
+gas-report.txt
