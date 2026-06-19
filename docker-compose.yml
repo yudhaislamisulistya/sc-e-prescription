@@ -145,12 +145,24 @@ services:
       dockerfile: services/kms-signer/Dockerfile
     container_name: epx-kms-signer
     environment:
+      # Keep the dev-only patient-key env fallback HARD-DISABLED in this stack:
+      # the service throws if it reaches getPatientPrivKey under production, so a
+      # raw patient key can never live in the service env. Override to a dev
+      # value only when wiring real HSM/KMS-less local testing.
+      NODE_ENV: production
       RPC_URL: http://besu-rpc:8545
       DATABASE_URL: postgres://app:${POSTGRES_PASSWORD:-eprescription}@postgres/eprescription
-      PORT: "4000"
+      # Code reads KMS_PORT (PORT is a secondary fallback); set both for clarity.
+      KMS_PORT: "4000"
+      # Authoritative identity contract: used to verify the pharmacist's ACTIVE
+      # PHARMACIST_ROLE and to fetch the on-chain encryption pubkey that the CEK
+      # is re-wrapped to. Without this the wrap target would be caller-controlled.
+      IDENTITY_REGISTRY_ADDRESS: ${IDENTITY_REGISTRY_ADDRESS:?set IDENTITY_REGISTRY_ADDRESS in .env (deployed IdentityRegistry address)}
+      # KMS_SERVICE_KEY and KMS_INTERNAL_TOKEN are provided as FILE secrets below;
+      # the service reads /run/secrets/<name> directly (no env export needed).
     depends_on: [besu-rpc, postgres]
     networks: [app-net]
-    secrets: [kms_service_key]
+    secrets: [kms_service_key, kms_internal_token]
     restart: unless-stopped
 
   # --- Next.js application -----------------------------------------------------
@@ -166,10 +178,14 @@ services:
       IPFS_API_URL: http://ipfs:5001
       IPFS_GATEWAY_URL: http://ipfs:8080
       KMS_SIGNER_URL: http://kms-signer:4000
+      IDENTITY_REGISTRY_ADDRESS: ${IDENTITY_REGISTRY_ADDRESS:?set IDENTITY_REGISTRY_ADDRESS in .env (deployed IdentityRegistry address)}
     ports:
       - "3000:3000"
     depends_on: [besu-rpc, postgres, redis, indexer]
     networks: [app-net]
+    # The app is the only legitimate caller of kms-signer; it presents the shared
+    # internal token (read from this file secret) as the Bearer credential.
+    secrets: [kms_internal_token]
     restart: unless-stopped
 
 networks:
@@ -191,5 +207,10 @@ secrets:
   # every consumer's DATABASE_URL without code changes.
   kms_service_key:
     file: ./secrets/kms_service_key.txt
+  # Shared bearer token for server-to-server calls to the kms-signer
+  # /grant-access endpoint. Generate a high-entropy value (e.g.
+  # `openssl rand -hex 32 > secrets/kms_internal_token.txt`) before first boot.
+  kms_internal_token:
+    file: ./secrets/kms_internal_token.txt
   ipfs_cluster_secret:
     file: ./secrets/ipfs_cluster_secret.txt
