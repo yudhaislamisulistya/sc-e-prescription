@@ -125,6 +125,15 @@ services:
       RPC_URL: http://besu-rpc:8545
       DATABASE_URL: postgres://app:${POSTGRES_PASSWORD:-eprescription}@postgres/eprescription
       REDIS_URL: redis://redis:6379
+      # REQUIRED: index.ts throws "PRESCRIPTION_REGISTRY_ADDRESS not set" at
+      # startup without this, and `restart: unless-stopped` would crash-loop it
+      # forever. Set it in the gitignored .env after deploying the contracts.
+      PRESCRIPTION_REGISTRY_ADDRESS: ${PRESCRIPTION_REGISTRY_ADDRESS:?set PRESCRIPTION_REGISTRY_ADDRESS in .env (deployed PrescriptionRegistry address)}
+      # Skip scanning from genesis on a fresh DB: start at the contract's deploy
+      # block. Defaults to 0 (whole chain) if unset.
+      START_BLOCK: ${START_BLOCK:-0}
+      # Confirmation lag behind the unfinalized tip (0 is safe on Besu IBFT 2.0).
+      CONFIRMATIONS: ${INDEXER_CONFIRMATIONS:-0}
     depends_on: [besu-rpc, postgres]
     networks: [app-net]
     restart: unless-stopped

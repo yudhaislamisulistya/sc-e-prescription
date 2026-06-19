@@ -20,7 +20,11 @@ CREATE TABLE IF NOT EXISTS prescription (
   expires_at        BIGINT NOT NULL,
   total_units       INTEGER NOT NULL,
   dispensed_units   INTEGER NOT NULL DEFAULT 0,
-  refills_allowed   SMALLINT NOT NULL DEFAULT 0,
+  -- refills_allowed is NULLable: PrescriptionIssued does not carry it (it lives
+  -- only in on-chain storage), so from events alone it is unknown. NULL = "not
+  -- known from the event stream"; an IdentityRegistry/getter backfill may set
+  -- it later. refills_used IS event-derived (PrescriptionRefilled.refillsUsed).
+  refills_allowed   SMALLINT,
   refills_used      SMALLINT NOT NULL DEFAULT 0,
   state             SMALLINT NOT NULL DEFAULT 1,
   updated_block     BIGINT NOT NULL,
@@ -35,10 +39,12 @@ CREATE INDEX IF NOT EXISTS idx_rx_expiry  ON prescription (expires_at);
 -- ---------------------------------------------------------------------------
 -- prescription_event: append-only audit log. One row per (block_number,
 -- log_index) so re-processing the same chain range is idempotent.
---   event_type ∈ {Issued, Dispensed, Revoked, Expired}
---   actor_addr  = doctor (Issued) / pharmacist (Dispensed) / by (Revoked)
+--   event_type ∈ {Issued, Dispensed, Refilled, Revoked, Expired}
+--   actor_addr  = doctor (Issued) / pharmacist (Dispensed) / by (Revoked);
+--                 Refilled/Expired carry no actor (NULL).
 --   units_delta = units dispensed (Dispensed only)
---   new_state   = resulting State enum value (Dispensed/Revoked/Expired)
+--   new_state   = resulting State enum value (Dispensed=2/3, Refilled=1/ISSUED,
+--                 Revoked=5, Expired=4)
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS prescription_event (
   block_number    BIGINT NOT NULL,
@@ -94,7 +100,12 @@ CREATE TABLE IF NOT EXISTS key_access (
 
 -- ---------------------------------------------------------------------------
 -- indexer_cursor: single-row (id=1) checkpoint of the last fully-processed
--- block. last_block_hash lets a future version detect reorgs.
+-- block. The indexer reads last_block_hash and, before advancing, re-fetches
+-- that block from the chain; if the hash no longer matches it rewinds one chunk
+-- and re-indexes (reorg recovery). last_log_index records the last applied log
+-- in the checkpointed block. Combined with the CONFIRMATIONS lag, this keeps
+-- the read model consistent across reorgs (benign on Besu IBFT 2.0's instant
+-- finality, but correct on probabilistic-finality chains too).
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS indexer_cursor (
   id              SMALLINT PRIMARY KEY DEFAULT 1,
