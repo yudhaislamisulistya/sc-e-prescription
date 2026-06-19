@@ -138,7 +138,9 @@ contract PrescriptionRegistry is IPrescriptionRegistry {
     function markExpired(bytes32 prescriptionId) external {
         Prescription storage p = _prescriptions[prescriptionId];
         if (block.timestamp <= p.expiresAt) revert InvalidState();
-        if (p.state == State.REVOKED || p.state == State.EXPIRED || p.state == State.None) revert InvalidState();
+        // Only non-terminal states may transition to EXPIRED (C9). FULLY_DISPENSED,
+        // REVOKED, EXPIRED are terminal; None is the non-existence sentinel.
+        if (p.state != State.ISSUED && p.state != State.PARTIALLY_DISPENSED) revert InvalidState();
 
         p.state = State.EXPIRED;
         emit PrescriptionExpired(prescriptionId);

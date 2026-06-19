@@ -262,4 +262,121 @@ describe("PrescriptionRegistry", function () {
     expect(presc.state).to.equal(4); // EXPIRED
     expect(await registry.read.verify([prescId])).to.be.false;
   });
+
+  it("(d++) markExpired cannot relabel a FULLY_DISPENSED prescription as EXPIRED", async () => {
+    const { registry, doctor, pharmacist, patientRef, payloadHash, cid, prescId, expiresAt, totalUnits, refillsAllowed, testClient } = await deploy();
+
+    await registry.write.issuePrescription(
+      [prescId, patientRef, cid, payloadHash, expiresAt, totalUnits, refillsAllowed],
+      { account: doctor.account }
+    );
+
+    // Exhaust all units → FULLY_DISPENSED (terminal state).
+    await registry.write.dispense([prescId, totalUnits], { account: pharmacist.account });
+    let presc = await registry.read.getPrescription([prescId]);
+    expect(presc.state).to.equal(3); // FULLY_DISPENSED
+
+    // Advance the chain past expiry. markExpired is permissionless, so a stranger
+    // attempts the illegal FULLY_DISPENSED -> EXPIRED transition.
+    await testClient.increaseTime({ seconds: 86400 * 31 });
+    await testClient.mine({ blocks: 1 });
+
+    await expect(
+      registry.write.markExpired([prescId], { account: doctor.account })
+    ).to.be.rejected;
+
+    // State must remain FULLY_DISPENSED — a completed dispensation is never
+    // relabeled "expired", so the audit record stays intact.
+    presc = await registry.read.getPrescription([prescId]);
+    expect(presc.state).to.equal(3); // still FULLY_DISPENSED, NOT EXPIRED
+  });
+
+  // ---------------------------------------------------------------------------
+  // issuePrescription input-validation guards (negative paths)
+  // ---------------------------------------------------------------------------
+
+  it("(e) issuePrescription reverts on duplicate prescriptionId", async () => {
+    const { registry, doctor, patientRef, payloadHash, cid, prescId, expiresAt, totalUnits, refillsAllowed } = await deploy();
+
+    await registry.write.issuePrescription(
+      [prescId, patientRef, cid, payloadHash, expiresAt, totalUnits, refillsAllowed],
+      { account: doctor.account }
+    );
+
+    // Same id reused → PrescriptionAlreadyExists.
+    await expect(
+      registry.write.issuePrescription(
+        [prescId, patientRef, cid, payloadHash, expiresAt, totalUnits, refillsAllowed],
+        { account: doctor.account }
+      )
+    ).to.be.rejected;
+
+    // Original prescription is untouched.
+    const presc = await registry.read.getPrescription([prescId]);
+    expect(presc.state).to.equal(1); // still ISSUED
+    expect(presc.totalUnits).to.equal(totalUnits);
+  });
+
+  it("(f) issuePrescription reverts when expiresAt <= block.timestamp", async () => {
+    const { registry, doctor, patientRef, payloadHash, cid, prescId, totalUnits, refillsAllowed, publicClient } = await deploy();
+
+    // Pin expiry to the current chain head timestamp (expiresAt == now → not > now).
+    const head = await publicClient.getBlock();
+    const expiredAt = head.timestamp;
+
+    await expect(
+      registry.write.issuePrescription(
+        [prescId, patientRef, cid, payloadHash, expiredAt, totalUnits, refillsAllowed],
+        { account: doctor.account }
+      )
+    ).to.be.rejected;
+
+    // Nothing was written.
+    const presc = await registry.read.getPrescription([prescId]);
+    expect(presc.state).to.equal(0); // None
+  });
+
+  it("(g) issuePrescription reverts when totalUnits == 0", async () => {
+    const { registry, doctor, patientRef, payloadHash, cid, prescId, expiresAt, refillsAllowed } = await deploy();
+
+    await expect(
+      registry.write.issuePrescription(
+        [prescId, patientRef, cid, payloadHash, expiresAt, 0, refillsAllowed],
+        { account: doctor.account }
+      )
+    ).to.be.rejected;
+
+    const presc = await registry.read.getPrescription([prescId]);
+    expect(presc.state).to.equal(0); // None
+  });
+
+  it("(h) issuePrescription reverts when payloadHash is zero", async () => {
+    const { registry, doctor, patientRef, cid, prescId, expiresAt, totalUnits, refillsAllowed } = await deploy();
+
+    const zeroHash = `0x${"00".repeat(32)}` as `0x${string}`;
+
+    await expect(
+      registry.write.issuePrescription(
+        [prescId, patientRef, cid, zeroHash, expiresAt, totalUnits, refillsAllowed],
+        { account: doctor.account }
+      )
+    ).to.be.rejected;
+
+    const presc = await registry.read.getPrescription([prescId]);
+    expect(presc.state).to.equal(0); // None
+  });
+
+  it("(i) issuePrescription reverts when cid is empty", async () => {
+    const { registry, doctor, patientRef, payloadHash, prescId, expiresAt, totalUnits, refillsAllowed } = await deploy();
+
+    await expect(
+      registry.write.issuePrescription(
+        [prescId, patientRef, "", payloadHash, expiresAt, totalUnits, refillsAllowed],
+        { account: doctor.account }
+      )
+    ).to.be.rejected;
+
+    const presc = await registry.read.getPrescription([prescId]);
+    expect(presc.state).to.equal(0); // None
+  });
 });
