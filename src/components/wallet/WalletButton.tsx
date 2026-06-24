@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/Button";
 import { useWallet } from "./useWallet";
 
 function shortAddr(a: string): string {
-  return `${a.slice(0, 6)}…${a.slice(-4)}`;
+  return `${a.slice(0, 6)}...${a.slice(-4)}`;
 }
 
 /** Connect / connected-state control for the injected wallet. */
@@ -28,7 +28,7 @@ export function WalletButton() {
 
   return (
     <Button size="sm" onClick={connect} disabled={connecting}>
-      {connecting ? "Connecting…" : "Connect wallet"}
+      {connecting ? "Connecting..." : "Connect wallet"}
     </Button>
   );
 }

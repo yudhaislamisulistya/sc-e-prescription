@@ -2,7 +2,7 @@ import { cn } from "./cn";
 import { STATE, TONE_CLASS, type StateCode } from "./lifecycle";
 import { MonoChip } from "./MonoChip";
 
-// The signature element: the on-chain prescription lifecycle made legible —
+// The signature element: the on-chain prescription lifecycle made legible -
 // a step track (Issued -> Partially -> Fully), a dispensing meter (N/M units),
 // terminal off-ramps (Expired / Revoked), and the cryptographic integrity chips.
 const FLOW: { code: StateCode; label: string }[] = [
@@ -67,7 +67,7 @@ export function LifecycleSpine({
       {terminal && (
         <div className={cn("inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-mono ring-1 ring-inset", t.pill)}>
           <span className={cn("h-1.5 w-1.5 rounded-full", t.dot)} />
-          {meta.label} — lifecycle ended
+          {meta.label} - lifecycle ended
         </div>
       )}
 

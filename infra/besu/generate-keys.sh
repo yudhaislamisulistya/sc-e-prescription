@@ -16,10 +16,10 @@
 #
 # NOTE: genesis.json ships with JSON-VALID *string* placeholders
 # ("REPLACE_WITH_IBFT_EXTRA_DATA" / "REPLACE_WITH_DEPLOYER_ADDRESS") so the
-# file still parses. They are NOT valid on-chain values — Besu will refuse to
+# file still parses. They are NOT valid on-chain values - Besu will refuse to
 # start until you substitute the real values generated below.
 #
-# Requirements (NOT available in the CI/dev sandbox — run on a real host):
+# Requirements (NOT available in the CI/dev sandbox - run on a real host):
 #   - Docker (to invoke the hyperledger/besu image), OR a local `besu` binary.
 #   - `openssl` for the deployer key, and either `node`/`cast` to derive the
 #     deployer address (instructions below). `jq` is optional but recommended.
@@ -244,7 +244,7 @@ fi
 # ---------------------------------------------------------------------------
 echo
 echo "============================================================================"
-echo " NEXT STEPS — edit infra/besu/genesis.json and replace the placeholders:"
+echo " NEXT STEPS - edit infra/besu/genesis.json and replace the placeholders:"
 echo "============================================================================"
 echo
 
@@ -268,7 +268,7 @@ else
 fi
 
 echo
-echo "Generated artifacts (all gitignored — never commit private keys):"
+echo "Generated artifacts (all gitignored - never commit private keys):"
 echo "  - validator key       : ${VALIDATOR_KEY_DST}"
 echo "  - deployer key        : ${DEPLOYER_KEY_FILE}"
 echo "  - operator-tool output: ${OUT_DIR}/ (genesis.json + keys/)"

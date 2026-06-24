@@ -37,8 +37,8 @@ export function encrypt(cek: Buffer, plaintext: Buffer): EncryptedPackage {
  * the self-describing envelope is validated before any cipher is constructed:
  *   - `alg` must be exactly "AES-256-GCM" (no silent algorithm downgrade);
  *   - `iv` must be exactly 12 bytes (the GCM nonce length we emit);
- *   - `authTag` must be exactly 16 bytes (the full 128-bit GCM tag — Node's
- *     decipher would otherwise accept truncated 4–15 byte tags, collapsing
+ *   - `authTag` must be exactly 16 bytes (the full 128-bit GCM tag - Node's
+ *     decipher would otherwise accept truncated 4-15 byte tags, collapsing
  *     forgery resistance from 2^128 down to as little as 2^32).
  */
 export function decrypt(cek: Buffer, pkg: EncryptedPackage): Buffer {

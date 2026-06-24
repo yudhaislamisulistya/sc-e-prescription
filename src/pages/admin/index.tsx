@@ -1,9 +1,9 @@
 // src/pages/admin/index.tsx
 //
-// Admin registry console — onboard actors (doctor / pharmacist / patient
+// Admin registry console - onboard actors (doctor / pharmacist / patient
 // custodian) and patients into the IdentityRegistry (RBAC, mitigates V3). Only
 // an ADMIN_ROLE account can submit these; the writes are signed by the connected
-// wallet. Patients are registered by their ref (a salted hash) — zero PII.
+// wallet. Patients are registered by their ref (a salted hash) - zero PII.
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { AppShell } from "@/components/ui/AppShell";
@@ -21,7 +21,7 @@ const selectClass =
   "w-full h-10 rounded-lg border border-line-strong bg-card px-3 text-sm text-ink focus:border-teal focus:outline-none focus:ring-2 focus:ring-teal/20";
 
 function shortAddr(a: string): string {
-  return `${a.slice(0, 6)}…${a.slice(-4)}`;
+  return `${a.slice(0, 6)}...${a.slice(-4)}`;
 }
 
 export default function AdminConsole() {
@@ -112,7 +112,7 @@ export default function AdminConsole() {
   }
 
   return (
-    <AppShell role="admin" active="actors" identity={address ? shortAddr(address) : undefined}>
+    <AppShell role="admin" active="actors" title="Registry" identity={address ? shortAddr(address) : undefined}>
       <div className="flex items-end justify-between gap-4 mb-6">
         <div>
           <p className="eyebrow mb-1">Admin console</p>
@@ -121,7 +121,7 @@ export default function AdminConsole() {
         {!address &&
           (available ? (
             <Button onClick={connect} disabled={connecting}>
-              {connecting ? "Connecting…" : "Connect wallet"}
+              {connecting ? "Connecting..." : "Connect wallet"}
             </Button>
           ) : (
             <span className="text-sm text-muted">No wallet detected</span>
@@ -143,7 +143,7 @@ export default function AdminConsole() {
           <p className="eyebrow mb-4">Register actor</p>
           <div className="space-y-4">
             <Field label="Actor address">
-              <Input placeholder="0x…" value={actorAddr} onChange={(e) => setActorAddr(e.target.value.trim())} className="font-mono" />
+              <Input placeholder="0x..." value={actorAddr} onChange={(e) => setActorAddr(e.target.value.trim())} className="font-mono" />
             </Field>
             <Field label="Role">
               <select className={selectClass} value={role} onChange={(e) => setRole(e.target.value as keyof typeof ROLE_NAMES)}>
@@ -154,17 +154,17 @@ export default function AdminConsole() {
             </Field>
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="License hash" hint="bytes32">
-                <Input placeholder="0x…" value={licenseHash} onChange={(e) => setLicenseHash(e.target.value.trim())} className="font-mono" />
+                <Input placeholder="0x..." value={licenseHash} onChange={(e) => setLicenseHash(e.target.value.trim())} className="font-mono" />
               </Field>
               <Field label="Institution id" hint="bytes32">
-                <Input placeholder="0x…" value={institutionId} onChange={(e) => setInstitutionId(e.target.value.trim())} className="font-mono" />
+                <Input placeholder="0x..." value={institutionId} onChange={(e) => setInstitutionId(e.target.value.trim())} className="font-mono" />
               </Field>
             </div>
-            <Field label="Encryption pubkey" hint="Uncompressed secp256k1 (0x04…), used to wrap keys for this actor.">
-              <Input placeholder="0x04…" value={actorPubKey} onChange={(e) => setActorPubKey(e.target.value.trim())} className="font-mono" />
+            <Field label="Encryption pubkey" hint="Uncompressed secp256k1 (0x04...), used to wrap keys for this actor.">
+              <Input placeholder="0x04..." value={actorPubKey} onChange={(e) => setActorPubKey(e.target.value.trim())} className="font-mono" />
             </Field>
             <Button onClick={registerActor} disabled={busyActor}>
-              {busyActor ? "Working…" : "Register actor"}
+              {busyActor ? "Working..." : "Register actor"}
             </Button>
           </div>
         </Card>
@@ -173,17 +173,17 @@ export default function AdminConsole() {
         <Card className="p-6">
           <p className="eyebrow mb-4">Register patient</p>
           <div className="space-y-4">
-            <Field label="Patient ref" hint="keccak256(salt, DID) — never the patient's identity.">
-              <Input placeholder="0x…" value={patientRef} onChange={(e) => setPatientRef(e.target.value.trim())} className="font-mono" />
+            <Field label="Patient ref" hint="keccak256(salt, DID) - never the patient's identity.">
+              <Input placeholder="0x..." value={patientRef} onChange={(e) => setPatientRef(e.target.value.trim())} className="font-mono" />
             </Field>
             <Field label="Encryption pubkey" hint="The patient's custodial public key.">
-              <Input placeholder="0x04…" value={patientPubKey} onChange={(e) => setPatientPubKey(e.target.value.trim())} className="font-mono" />
+              <Input placeholder="0x04..." value={patientPubKey} onChange={(e) => setPatientPubKey(e.target.value.trim())} className="font-mono" />
             </Field>
             <Field label="Custodian address" hint="The KMS service EOA that re-wraps keys for this patient.">
-              <Input placeholder="0x…" value={custodian} onChange={(e) => setCustodian(e.target.value.trim())} className="font-mono" />
+              <Input placeholder="0x..." value={custodian} onChange={(e) => setCustodian(e.target.value.trim())} className="font-mono" />
             </Field>
             <Button onClick={registerPatient} disabled={busyPatient}>
-              {busyPatient ? "Working…" : "Register patient"}
+              {busyPatient ? "Working..." : "Register patient"}
             </Button>
           </div>
         </Card>

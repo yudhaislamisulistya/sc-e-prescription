@@ -15,7 +15,7 @@ p2p-port = 30304
 # The validator enode is host-specific (it embeds the validator node id, known
 # only after key generation), so generate-keys.sh writes a static-nodes.json
 # which docker-compose mounts into this node's data-path
-# (/data/besu-rpc/static-nodes.json) — Besu auto-loads it from there.
+# (/data/besu-rpc/static-nodes.json) - Besu auto-loads it from there.
 # The enode host is the compose service DNS name "besu-validator"; enable DNS so
 # Besu resolves it to the container IP at dial time. Xdns-* govern OUTBOUND enode
 # resolution only and do NOT require relaxing the inbound Host-header check.

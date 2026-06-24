@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 /* ===========================================================================
-   Clinical Trust — design tokens
+   Clinical Trust - design tokens
    A permissioned-ledger e-prescription system. Light, calm, medical-grade.
    Teal is the single brand accent; the lifecycle status colours are treated as
    information (each on-chain State has one learnable colour). On-chain data is
-   always set in the mono face — the typographic signature of a verifiable ledger.
+   always set in the mono face - the typographic signature of a verifiable ledger.
    =========================================================================== */
 @theme {
   /* Surfaces & ink */

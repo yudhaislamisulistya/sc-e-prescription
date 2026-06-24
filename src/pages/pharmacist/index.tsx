@@ -1,6 +1,6 @@
 // src/pages/pharmacist/index.tsx
 //
-// Pharmacist console — look up a prescription by id (read straight from chain),
+// Pharmacist console - look up a prescription by id (read straight from chain),
 // see its lifecycle, and dispense units or refill. On-chain accounting makes
 // double-dispensing impossible across the consortium; the UI reflects the same
 // invariants (cannot dispense past the remaining units or out of a valid state).
@@ -34,7 +34,7 @@ interface Rx {
 }
 
 function shortAddr(a: string): string {
-  return `${a.slice(0, 6)}…${a.slice(-4)}`;
+  return `${a.slice(0, 6)}...${a.slice(-4)}`;
 }
 
 export default function PharmacistConsole() {
@@ -94,7 +94,7 @@ export default function PharmacistConsole() {
     if (!address) return toast.warning("Connect your wallet first.");
     const u = Number(units);
     if (!Number.isInteger(u) || u <= 0 || u > remaining) {
-      return toast.warning(`Enter 1–${remaining} units.`);
+      return toast.warning(`Enter 1-${remaining} units.`);
     }
     setBusy(true);
     try {
@@ -130,7 +130,7 @@ export default function PharmacistConsole() {
         chain: besuChain,
       });
       await publicClient().waitForTransactionReceipt({ hash });
-      toast.success("Refilled — units reset, status back to issued.");
+      toast.success("Refilled - units reset, status back to issued.");
       await lookup(rx.id);
     } catch (err) {
       toast.error((err as Error).message || "Refill failed.");
@@ -140,7 +140,7 @@ export default function PharmacistConsole() {
   }
 
   return (
-    <AppShell role="pharmacist" active="dispense" identity={address ? shortAddr(address) : undefined}>
+    <AppShell role="pharmacist" active="dispense" title="Dispense" identity={address ? shortAddr(address) : undefined}>
       <div className="flex items-end justify-between gap-4 mb-6">
         <div>
           <p className="eyebrow mb-1">Pharmacist console</p>
@@ -149,7 +149,7 @@ export default function PharmacistConsole() {
         {!address &&
           (available ? (
             <Button onClick={connect} disabled={connecting}>
-              {connecting ? "Connecting…" : "Connect wallet"}
+              {connecting ? "Connecting..." : "Connect wallet"}
             </Button>
           ) : (
             <span className="text-sm text-muted">No wallet detected</span>
@@ -160,7 +160,7 @@ export default function PharmacistConsole() {
         <div className="flex flex-col sm:flex-row sm:items-end gap-3">
           <Field label="Prescription id" className="flex-1">
             <Input
-              placeholder="0x…"
+              placeholder="0x..."
               value={lookupId}
               onChange={(e) => setLookupId(e.target.value.trim())}
               onKeyDown={(e) => e.key === "Enter" && lookup()}
@@ -168,7 +168,7 @@ export default function PharmacistConsole() {
             />
           </Field>
           <Button variant="secondary" onClick={() => lookup()} disabled={loading}>
-            {loading ? "Looking up…" : "Look up"}
+            {loading ? "Looking up..." : "Look up"}
           </Button>
         </div>
       </Card>
@@ -216,16 +216,16 @@ export default function PharmacistConsole() {
 
             {canDispense ? (
               <div className="space-y-3">
-                <Field label={`Units to dispense (1–${remaining})`}>
+                <Field label={`Units to dispense (1-${remaining})`}>
                   <Input type="number" min={1} max={remaining} value={units} onChange={(e) => setUnits(e.target.value)} />
                 </Field>
                 <Button className="w-full" onClick={dispense} disabled={busy}>
-                  {busy ? "Working…" : "Dispense"}
+                  {busy ? "Working..." : "Dispense"}
                 </Button>
               </div>
             ) : canRefill ? (
               <Button className="w-full" onClick={refill} disabled={busy}>
-                {busy ? "Working…" : "Refill prescription"}
+                {busy ? "Working..." : "Refill prescription"}
               </Button>
             ) : (
               <p className="text-sm text-muted">No dispensing action available in this state.</p>

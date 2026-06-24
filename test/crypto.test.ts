@@ -103,7 +103,7 @@ describe("crypto", function () {
 
     it("addrToRecipientBytes32 matches bytes32(uint256(uint160(addr)))", () => {
       // Finding 2: this encoding must match KeyAccessRegistry's
-      // bytes32(uint256(uint160(addr))) layout — the address occupies the low
+      // bytes32(uint256(uint160(addr))) layout - the address occupies the low
       // 160 bits, left-padded with zero bytes to 32 bytes. Locks padding side,
       // length and lower-casing against silent regression.
       const addr = "0xAbC0000000000000000000000000000000000123";
@@ -158,7 +158,7 @@ describe("crypto", function () {
 
     // A fixed Prescription message. If anyone reorders the 8 fields or changes a
     // type in PRESCRIPTION_TYPES, the EIP-712 struct hash changes and the
-    // signature produced here will no longer recover to EXPECTED_ADDR — the
+    // signature produced here will no longer recover to EXPECTED_ADDR - the
     // verification assertions below fail loudly.
     const message: PrescriptionTypedData = {
       prescriptionId:

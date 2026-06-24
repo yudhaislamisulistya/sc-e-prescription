@@ -147,7 +147,7 @@ describe("PrescriptionRegistry", function () {
   });
 
   // ---------------------------------------------------------------------------
-  // Additional required tests (a)–(d)
+  // Additional required tests (a)-(d)
   // ---------------------------------------------------------------------------
 
   it("(a) cannot dispense after revoke", async () => {
@@ -285,7 +285,7 @@ describe("PrescriptionRegistry", function () {
       registry.write.markExpired([prescId], { account: doctor.account })
     ).to.be.rejected;
 
-    // State must remain FULLY_DISPENSED — a completed dispensation is never
+    // State must remain FULLY_DISPENSED - a completed dispensation is never
     // relabeled "expired", so the audit record stays intact.
     presc = await registry.read.getPrescription([prescId]);
     expect(presc.state).to.equal(3); // still FULLY_DISPENSED, NOT EXPIRED

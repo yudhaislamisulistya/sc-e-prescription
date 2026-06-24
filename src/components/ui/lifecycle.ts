@@ -1,4 +1,4 @@
-// Lifecycle metadata — mirrors the on-chain IPrescriptionRegistry.State enum.
+// Lifecycle metadata - mirrors the on-chain IPrescriptionRegistry.State enum.
 // The tone drives the status colour system (each State has ONE learnable colour).
 export type StateCode = 0 | 1 | 2 | 3 | 4 | 5;
 export type Tone = "none" | "issued" | "partial" | "full" | "expired" | "revoked";

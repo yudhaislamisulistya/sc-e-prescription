@@ -7,7 +7,7 @@
 //   1. Validates inputs.
 //   2. Resolves the prescription's patientRef from the chain (source of truth).
 //   3. Reads the patient-wrapped CEK from the KeyAccessRegistry (public on-chain
-//      ECIES blob — readable by anyone, decryptable only by the patient key).
+//      ECIES blob - readable by anyone, decryptable only by the patient key).
 //   4. Delegates the unwrap -> re-wrap -> on-chain grantAccess to the kms-signer
 //      microservice, authenticating with the shared internal bearer token.
 //

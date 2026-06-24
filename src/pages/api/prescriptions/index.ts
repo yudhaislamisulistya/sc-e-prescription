@@ -2,7 +2,7 @@
 //
 // Read-model list endpoint. GET the prescription projection with optional
 // filters (?patient=, ?doctor=, ?state=, ?limit=). All filters are validated and
-// bound as parameters ($1,$2,...) — no string interpolation of user input.
+// bound as parameters ($1,$2,...) - no string interpolation of user input.
 import type { NextApiRequest, NextApiResponse } from "next";
 import { createPool } from "../../../../lib/pg-pool";
 

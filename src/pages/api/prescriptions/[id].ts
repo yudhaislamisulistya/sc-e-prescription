@@ -6,9 +6,9 @@
 // This is a read-only projection query. It returns only non-PII fields: the
 // patientRef is a salted hash (never PII), and wrapped keys / ciphertext are not
 // in this table at all. The id is validated as a bytes32 and bound via a
-// PARAMETERIZED query ($1) — no string interpolation, so no SQL injection.
+// PARAMETERIZED query ($1) - no string interpolation, so no SQL injection.
 //
-// Root-level lib imported via a RELATIVE path — root `lib/` has no tsconfig alias.
+// Root-level lib imported via a RELATIVE path - root `lib/` has no tsconfig alias.
 import type { NextApiRequest, NextApiResponse } from "next";
 import { createPool } from "../../../../lib/pg-pool";
 

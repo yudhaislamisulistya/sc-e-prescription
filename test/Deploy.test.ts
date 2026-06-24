@@ -29,7 +29,7 @@ describe("Deploy (Ignition module)", function () {
     // Cross-wiring: read back the constructor-injected immutables and assert
     // each registry points at the right sibling. Without these, swapping the
     // KeyAccessRegistry args to [prescriptionRegistry, identityRegistry] would
-    // still deploy three distinct addresses and pass — defeating the test.
+    // still deploy three distinct addresses and pass - defeating the test.
     const prIdentity = (await prescriptionRegistry.read.identityRegistry()) as `0x${string}`;
     expect(prIdentity.toLowerCase(), "prescriptionRegistry.identityRegistry()").to.equal(
       identityRegistry.address.toLowerCase()

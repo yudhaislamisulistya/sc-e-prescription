@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# evaluation/slither.sh — static analysis of the three registries (spec V7).
+# evaluation/slither.sh - static analysis of the three registries (spec V7).
 #
 # Best-effort by design: if slither (or solc) is not installed, this prints an
 # install hint and exits 0 so it never hard-fails an evaluation pipeline. When
@@ -12,7 +12,7 @@ cd "$(dirname "$0")/.."
 OUT_DIR="evaluation"
 
 if ! command -v slither >/dev/null 2>&1; then
-  echo "[slither] not installed — skipping static analysis."
+  echo "[slither] not installed - skipping static analysis."
   echo "[slither] install with: pip3 install slither-analyzer  (also needs solc; e.g. 'pip3 install solc-select && solc-select install 0.8.28 && solc-select use 0.8.28')"
   exit 0
 fi

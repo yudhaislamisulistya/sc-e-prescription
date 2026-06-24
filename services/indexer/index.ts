@@ -13,7 +13,7 @@
 // IMPORTANT: the parseAbiItem signatures below are copied verbatim from
 // contracts/PrescriptionRegistry.sol (and re-verified against the compiled
 // artifact ABI). The on-chain `State newState` enum argument of
-// PrescriptionDispensed is `uint8` in the compiled ABI — a single type/name
+// PrescriptionDispensed is `uint8` in the compiled ABI - a single type/name
 // mismatch here makes viem compute a different topic0 and silently index
 // nothing.
 import {
@@ -141,7 +141,7 @@ async function main(): Promise<void> {
           continue;
         }
       } catch (err) {
-        // Block not found (pruned/just-reorged) — back off and retry next loop.
+        // Block not found (pruned/just-reorged) - back off and retry next loop.
         console.warn("[indexer] reorg check failed, retrying:", err);
         await sleep(POLL_INTERVAL_MS);
         continue;

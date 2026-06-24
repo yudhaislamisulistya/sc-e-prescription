@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import Head from "next/head";
 import { cn } from "./cn";
 
 export type Role = "doctor" | "pharmacist" | "patient" | "admin";
@@ -12,10 +13,7 @@ const ROLE_LABEL: Record<Role, string> = {
 };
 
 const NAV: Record<Role, { key: string; label: string; href: string }[]> = {
-  doctor: [
-    { key: "issue", label: "Issue", href: "/doctor" },
-    { key: "patients", label: "Patients", href: "/doctor/patients" },
-  ],
+  doctor: [{ key: "issue", label: "Issue", href: "/doctor" }],
   pharmacist: [{ key: "dispense", label: "Dispense", href: "/pharmacist" }],
   patient: [{ key: "mine", label: "My prescriptions", href: "/patient" }],
   admin: [
@@ -30,7 +28,7 @@ function Brand({ role }: { role: Role }) {
       <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-teal text-white font-mono text-sm font-bold">
         ℞
       </span>
-      <span className="font-semibold tracking-tight">e‑Prescription</span>
+      <span className="font-semibold tracking-tight">e-Prescription</span>
       <span className="hidden sm:inline eyebrow ml-1">{ROLE_LABEL[role]}</span>
     </Link>
   );
@@ -40,15 +38,20 @@ export function AppShell({
   role,
   active,
   identity,
+  title,
   children,
 }: {
   role: Role;
   active?: string;
   identity?: string;
+  title?: string;
   children: ReactNode;
 }) {
   return (
     <div className="min-h-screen flex flex-col bg-paper">
+      <Head>
+        <title>{title ? `${title} · e-Prescription` : "e-Prescription"}</title>
+      </Head>
       <header className="sticky top-0 z-40 border-b border-line bg-card/90 backdrop-blur">
         <div className="mx-auto max-w-6xl px-5 h-14 flex items-center justify-between gap-4">
           <Brand role={role} />

@@ -1,6 +1,6 @@
 // src/pages/dashboard/index.tsx
 //
-// Ledger dashboard — the read model projected from on-chain events (mitigates
+// Ledger dashboard - the read model projected from on-chain events (mitigates
 // V6: a queryable, tamper-evident view of every prescription's current state).
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -45,7 +45,7 @@ export default function Dashboard() {
   }, [filter, load]);
 
   return (
-    <AppShell role="admin" active="ledger">
+    <AppShell role="admin" active="ledger" title="Ledger">
       <div className="mb-6">
         <p className="eyebrow mb-1">Read model</p>
         <h1 className="text-2xl font-semibold tracking-tight">Prescription ledger</h1>
@@ -89,7 +89,7 @@ export default function Dashboard() {
 
       {/* list */}
       {loading ? (
-        <Card className="p-8 text-center text-sm text-muted">Loading…</Card>
+        <Card className="p-8 text-center text-sm text-muted">Loading...</Card>
       ) : rows && rows.length > 0 ? (
         <div className="space-y-3">
           {rows.map((rx) => (

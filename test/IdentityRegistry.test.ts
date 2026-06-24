@@ -173,7 +173,7 @@ describe("IdentityRegistry", function () {
   it("admin (constructor-granted, never run through registerActor) is authorized for ADMIN_ROLE", async () => {
     // Regression guard: the admin receives ADMIN_ROLE only via the constructor's
     // _grantRole and is never put through registerActor, so _actors[admin].role
-    // stays bytes32(0). isAuthorized(ADMIN_ROLE, admin) MUST still return true —
+    // stays bytes32(0). isAuthorized(ADMIN_ROLE, admin) MUST still return true -
     // downstream contracts (PrescriptionRegistry.revoke, KeyAccessRegistry
     // grant/revokeAccess) gate the admin emergency paths on exactly this call.
     const { registry, admin } = await deploy();

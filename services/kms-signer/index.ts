@@ -1,6 +1,6 @@
 // services/kms-signer/index.ts
 //
-// KMS signer microservice — patient-custodian CEK re-wrap (spec §10.5, mitigates V2).
+// KMS signer microservice - patient-custodian CEK re-wrap (spec §10.5, mitigates V2).
 //
 // This service holds the PATIENT_CUSTODIAN_ROLE service EOA (KMS_SERVICE_KEY).
 // It is the ONLY actor allowed to re-distribute a patient's content-encryption
@@ -24,7 +24,7 @@
 //      but their OWN pubkey and recover the plaintext CEK from the public chain).
 //   4. Unwrap the per-prescription CEK using the PATIENT private key. In
 //      production this MUST be a non-extractable key operation inside an HSM
-//      (AWS KMS / HashiCorp Vault Transit) — the raw private key NEVER leaves
+//      (AWS KMS / HashiCorp Vault Transit) - the raw private key NEVER leaves
 //      the boundary; the service only receives the decrypted CEK. The
 //      `getPatientPrivKey` abstraction below models that boundary; its
 //      process.env fallback is DEV ONLY and is HARD-DISABLED when
@@ -34,7 +34,7 @@
 //      KeyAccessRegistry, signed by the custodian EOA via a viem walletClient.
 //
 // NOTE ON RUNTIME VERIFICATION: this file is type-checked (`tsc --noEmit`) but is
-// NOT runtime-verified in this workspace — Besu, IPFS and the deployed
+// NOT runtime-verified in this workspace - Besu, IPFS and the deployed
 // KeyAccessRegistry are unavailable here. It is scaffolding for the
 // docker-compose deployment.
 import { createServer, type IncomingMessage, type ServerResponse } from "http";
@@ -53,7 +53,7 @@ const IS_PRODUCTION = process.env.NODE_ENV === "production";
  * (`<NAME>_FILE` path, or the conventional /run/secrets/<lower-name>). This lets
  * docker-compose supply the value as a file secret (the only mechanism the
  * compose block uses) WITHOUT the operator also having to export it as an env
- * var — which previously crash-looped the container.
+ * var - which previously crash-looped the container.
  */
 function readSecret(name: string, defaultFile: string): string | undefined {
   const direct = process.env[name];
@@ -189,7 +189,7 @@ interface GrantAccessRequest {
    * (a mismatch is rejected as a 409).
    */
   pharmacyPubKeyHex?: string;
-  /** Pharmacy EOA address — the authoritative identity for both auth + pubkey. */
+  /** Pharmacy EOA address - the authoritative identity for both auth + pubkey. */
   pharmacyAddr: `0x${string}`;
 }
 
@@ -200,12 +200,12 @@ interface GrantAccessRequest {
  *
  * PRODUCTION: this MUST be implemented as a NON-EXTRACTABLE key operation backed
  * by AWS KMS (`Decrypt`/`asymmetric`) or HashiCorp Vault Transit. The private key
- * never leaves the HSM boundary — the HSM performs the ECIES unwrap and returns
+ * never leaves the HSM boundary - the HSM performs the ECIES unwrap and returns
  * only the CEK. The string return type here is a DEV stand-in for that boundary.
  *
  * DEV ONLY: the `process.env.PATIENT_KEY_<patientRef>` fallback below loads a raw
  * private key from the environment. This path is HARD-DISABLED under
- * NODE_ENV==="production" — there is no HSM integration in this scaffold, so a
+ * NODE_ENV==="production" - there is no HSM integration in this scaffold, so a
  * production deployment that reached this code would otherwise be silently
  * holding raw patient keys in its environment. It throws instead.
  */
@@ -278,7 +278,7 @@ async function handleGrantAccess(body: string, res: ServerResponse): Promise<voi
   }
 
   // 2. BIND the wrap target to identity: fetch the AUTHORITATIVE on-chain pubkey.
-  //    The CEK is re-wrapped to THIS key only — never to a caller-supplied one.
+  //    The CEK is re-wrapped to THIS key only - never to a caller-supplied one.
   const onChainPubKeyBytes = (await publicClient.readContract({
     address: IDENTITY_REGISTRY_ADDRESS,
     abi: IDENTITY_REGISTRY_ABI,

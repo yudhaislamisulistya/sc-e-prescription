@@ -31,7 +31,7 @@ export function unwrapCEK(recipientPrivKeyHex: string, wrappedKey: Buffer): Buff
 
 /**
  * Encode an EOA address as the bytes32 recipient key used in KeyAccessRegistry.
- * recipient = bytes32(uint256(uint160(addr))) — i.e. left-padded to 32 bytes.
+ * recipient = bytes32(uint256(uint160(addr))) - i.e. left-padded to 32 bytes.
  */
 export function addrToRecipientBytes32(address: string): `0x${string}` {
   const addr = address.toLowerCase().replace(/^0x/, "");

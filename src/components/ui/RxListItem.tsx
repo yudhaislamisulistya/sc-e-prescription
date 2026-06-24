@@ -14,7 +14,7 @@ export interface RxSummary {
 }
 
 function shorten(v: string): string {
-  return v.length > 12 ? `${v.slice(0, 6)}…${v.slice(-4)}` : v;
+  return v.length > 12 ? `${v.slice(0, 6)}...${v.slice(-4)}` : v;
 }
 
 export function RxListItem({

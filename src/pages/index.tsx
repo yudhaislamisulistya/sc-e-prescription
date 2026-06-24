@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Head from "next/head";
 import { Card } from "@/components/ui/Card";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { LifecycleSpine } from "@/components/ui/LifecycleSpine";
@@ -20,11 +21,18 @@ const STATS: [string, string][] = [
 export default function Home() {
   return (
     <div className="min-h-screen bg-paper flex flex-col">
+      <Head>
+        <title>e-Prescription · Prescriptions you can prove</title>
+        <meta
+          name="description"
+          content="A redesigned smart-contract e-prescription system: doctor-signed, end-to-end encrypted, lifecycle-tracked prescriptions on a permissioned consortium blockchain."
+        />
+      </Head>
       <header className="mx-auto w-full max-w-6xl px-5 h-14 flex items-center gap-2">
         <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-teal text-white font-mono text-sm font-bold">
           ℞
         </span>
-        <span className="font-semibold tracking-tight">e‑Prescription</span>
+        <span className="font-semibold tracking-tight">e-Prescription</span>
         <span className="eyebrow ml-1 hidden sm:inline">Smart-contract redesign</span>
       </header>
 
@@ -37,8 +45,8 @@ export default function Home() {
               Prescriptions you can <span className="text-teal">prove</span>.
             </h1>
             <p className="mt-5 text-muted text-lg max-w-md leading-relaxed">
-              Every prescription is signed by its doctor, encrypted end‑to‑end, and tracked through a
-              tamper‑evident lifecycle — from issued to dispensed — on a consortium blockchain.
+              Every prescription is signed by its doctor, encrypted end-to-end, and tracked through a
+              tamper-evident lifecycle, from issued to dispensed, on a consortium blockchain.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <a
@@ -69,7 +77,7 @@ export default function Home() {
             <div className="flex items-start justify-between mb-5">
               <div>
                 <p className="eyebrow">Prescription</p>
-                <p className="font-mono text-sm text-ink mt-1">0x9f2a…41c7</p>
+                <p className="font-mono text-sm text-ink mt-1">0x9f2a...41c7</p>
               </div>
               <StatusPill state={2} />
             </div>
@@ -77,11 +85,11 @@ export default function Home() {
               state={2}
               totalUnits={30}
               dispensedUnits={10}
-              cid="bafybeigdyr…fbzdi"
-              payloadHash="0xaa31…9c0e"
+              cid="bafybeigdyr...fbzdi"
+              payloadHash="0xaa31...9c0e"
             />
             <p className="mt-5 text-xs text-muted">
-              Live example — the same lifecycle view every role sees, read straight from the chain.
+              Live example: the same lifecycle view every role sees, read straight from the chain.
             </p>
           </Card>
         </section>
@@ -96,7 +104,7 @@ export default function Home() {
             ))}
           </div>
           <p className="mt-4 text-xs text-muted">
-            Consoles are being rebuilt on the redesigned backend — enabled one role at a time.
+            Consoles are being rebuilt on the redesigned backend, enabled one role at a time.
           </p>
         </section>
 
@@ -106,10 +114,10 @@ export default function Home() {
           <h2 className="text-2xl font-semibold tracking-tight mb-6">How a prescription moves</h2>
           <ol className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              ["Issue", "The doctor signs the prescription (EIP‑712). It is encrypted and pinned; only its hash and lifecycle live on-chain."],
-              ["Grant", "Keys are wrapped per recipient. The patient's custodian re‑wraps the key for the chosen pharmacy — no plaintext leaves the boundary."],
-              ["Dispense", "The pharmacist dispenses units. On-chain accounting makes double‑dispensing impossible across the consortium."],
-              ["Audit", "Every transition is an event, projected into a read model — a complete, tamper‑evident trail."],
+              ["Issue", "The doctor signs the prescription (EIP-712). It is encrypted and pinned; only its hash and lifecycle live on-chain."],
+              ["Grant", "Keys are wrapped per recipient. The patient's custodian re-wraps the key for the chosen pharmacy; no plaintext leaves the boundary."],
+              ["Dispense", "The pharmacist dispenses units. On-chain accounting makes double-dispensing impossible across the consortium."],
+              ["Audit", "Every transition is an event, projected into a read model: a complete, tamper-evident trail."],
             ].map(([title, body], i) => (
               <li key={title}>
                 <Card className="p-5 h-full">

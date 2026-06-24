@@ -12,7 +12,7 @@
 #
 # NOTE: services/* build contexts (indexer, kms-signer) and secrets/*.txt are
 # provided by other tasks / by the operator at deploy time. The secrets/
-# directory is committed empty (.gitkeep) and gitignored — real secret values
+# directory is committed empty (.gitkeep) and gitignored - real secret values
 # must never be committed.
 #
 # Postgres credentials: the database password is a Docker FILE secret
@@ -93,7 +93,7 @@ services:
     volumes:
       - ipfs-data:/data/ipfs
     ports:
-      # Kubo admin API (5001) is unauthenticated + powerful — loopback only.
+      # Kubo admin API (5001) is unauthenticated + powerful - loopback only.
       - "127.0.0.1:5001:5001"
       - "8080:8080"
     networks: [app-net]
@@ -127,7 +127,7 @@ services:
     environment:
       RPC_URL: http://besu-rpc:8545
       # DB: host/user/db via PG* env; password read from the pg_password file
-      # secret by lib/pg-pool.ts — never embedded in a URL.
+      # secret by lib/pg-pool.ts - never embedded in a URL.
       PGHOST: postgres
       PGUSER: app
       PGDATABASE: eprescription
@@ -184,7 +184,7 @@ services:
       NEXT_PUBLIC_CHAIN_ID: "1337"
       RPC_URL: http://besu-rpc:8545
       # DB: host/user/db via PG* env; password from the pg_password file secret
-      # (lib/pg-pool.ts) — never embedded in a URL.
+      # (lib/pg-pool.ts) - never embedded in a URL.
       PGHOST: postgres
       PGUSER: app
       PGDATABASE: eprescription
@@ -221,7 +221,7 @@ volumes:
   ipfs-cluster-data: {}
 
 secrets:
-  # Postgres password — file secret shared by the DB server and every consumer
+  # Postgres password - file secret shared by the DB server and every consumer
   # (read at runtime by lib/pg-pool.ts). Create before first boot, e.g.
   # `openssl rand -hex 24 > secrets/pg_password.txt`.
   pg_password:

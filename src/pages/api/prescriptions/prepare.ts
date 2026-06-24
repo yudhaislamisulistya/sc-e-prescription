@@ -12,8 +12,8 @@
 //      computes the REAL `payloadHash` = keccak256(packageBytes). This is the
 //      exact hash that will be anchored on-chain and that the doctor's EIP-712
 //      signature commits to.
-//   4. Returns the EIP-712 typed data — including the REAL `payloadHash` and the
-//      `verifyingContract` (the PrescriptionRegistry address) — for the client
+//   4. Returns the EIP-712 typed data - including the REAL `payloadHash` and the
+//      `verifyingContract` (the PrescriptionRegistry address) - for the client
 //      to sign locally, together with the encrypted package + CEK so the
 //      stateless `submit` step can re-pin the EXACT bytes and re-verify.
 //
@@ -25,7 +25,7 @@
 // (patientRef is a salted hash, never PII). The CEK and ciphertext are returned
 // only to the doctor's own client (the author of the plaintext), never stored.
 //
-// Root-level libs are imported via RELATIVE paths — the `@/*` alias maps to
+// Root-level libs are imported via RELATIVE paths - the `@/*` alias maps to
 // `src/`, and the root `lib/` directory has NO alias.
 import type { NextApiRequest, NextApiResponse } from "next";
 import { keccak256, encodePacked, toHex, isAddress } from "viem";
@@ -124,7 +124,7 @@ export default async function handler(
     // prescriptionId = keccak256(encodePacked(address, bytes32, uint64, bytes8)).
     // This id is the value the client passes to issuePrescription (the contract
     // enforces uniqueness via its `state != None` check) AND the value the
-    // EIP-712 signature commits to — so the doctor's signature binds a specific
+    // EIP-712 signature commits to - so the doctor's signature binds a specific
     // id to specific content. `submit` re-verifies that this exact id is the one
     // covered by the signature before allowing the prescription to proceed.
     const prescriptionId = keccak256(
@@ -137,7 +137,7 @@ export default async function handler(
     const canonicalPayload = {
       schemaVersion: "1.0.0",
       prescriptionId,
-      // Authoring (intent) time — see note above; NOT the on-chain issuedAt.
+      // Authoring (intent) time - see note above; NOT the on-chain issuedAt.
       issuedAt: Number(issuedAt),
       expiresAt,
       doctor: { address: doctorAddress },

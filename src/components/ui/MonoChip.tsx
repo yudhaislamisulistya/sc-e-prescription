@@ -3,7 +3,7 @@ import { cn } from "./cn";
 
 function truncateMiddle(v: string, head = 6, tail = 4): string {
   if (v.length <= head + tail + 1) return v;
-  return `${v.slice(0, head)}…${v.slice(-tail)}`;
+  return `${v.slice(0, head)}...${v.slice(-tail)}`;
 }
 
 /** A monospace chip for on-chain data (hash / address / cid) with copy-to-clipboard. */

@@ -1,6 +1,6 @@
 // src/pages/doctor/index.tsx
 //
-// Doctor console — issue a prescription end to end on the redesigned backend:
+// Doctor console - issue a prescription end to end on the redesigned backend:
 //   1. /api/prescriptions/prepare  -> canonical payload + EIP-712 typed data + CEK
 //   2. wallet.signTypedData         -> the doctor's non-repudiable signature
 //   3. /api/prescriptions/submit    -> encrypt + pin to IPFS, wrap CEK for patient
@@ -47,7 +47,7 @@ function defaultExpiry(): string {
 }
 
 function shortAddr(a: string): string {
-  return `${a.slice(0, 6)}…${a.slice(-4)}`;
+  return `${a.slice(0, 6)}...${a.slice(-4)}`;
 }
 
 export default function DoctorConsole() {
@@ -181,7 +181,7 @@ export default function DoctorConsole() {
   }
 
   return (
-    <AppShell role="doctor" active="issue" identity={address ? shortAddr(address) : undefined}>
+    <AppShell role="doctor" active="issue" title="Issue prescription" identity={address ? shortAddr(address) : undefined}>
       <div className="flex items-end justify-between gap-4 mb-6">
         <div>
           <p className="eyebrow mb-1">Doctor console</p>
@@ -190,7 +190,7 @@ export default function DoctorConsole() {
         {!address &&
           (available ? (
             <Button onClick={connect} disabled={connecting}>
-              {connecting ? "Connecting…" : "Connect wallet"}
+              {connecting ? "Connecting..." : "Connect wallet"}
             </Button>
           ) : (
             <span className="text-sm text-muted">No wallet detected</span>
@@ -214,10 +214,10 @@ export default function DoctorConsole() {
           <div className="space-y-4">
             <Field
               label="Patient reference"
-              hint="The patient's on-chain ref (keccak256 of salt + DID) — never their identity."
+              hint="The patient's on-chain ref (keccak256 of salt + DID) - never their identity."
             >
               <Input
-                placeholder="0x…"
+                placeholder="0x..."
                 value={patientRef}
                 onChange={(e) => setPatientRef(e.target.value.trim())}
                 className="font-mono"
@@ -233,7 +233,7 @@ export default function DoctorConsole() {
               </Field>
             </div>
 
-            <Field label="Instructions" hint="Encrypted with the prescription — never stored in plaintext.">
+            <Field label="Instructions" hint="Encrypted with the prescription - never stored in plaintext.">
               <Textarea
                 placeholder="e.g. One tablet daily, after breakfast."
                 value={instructions}
@@ -254,9 +254,9 @@ export default function DoctorConsole() {
 
             <div className="flex items-center gap-3 pt-2">
               <Button onClick={handleIssue} disabled={!canSubmit || !!formError}>
-                {busy ? "Working…" : "Sign & issue prescription"}
+                {busy ? "Working..." : "Sign & issue prescription"}
               </Button>
-              {busy && step && <span className="font-mono text-xs text-muted">{step}…</span>}
+              {busy && step && <span className="font-mono text-xs text-muted">{step}...</span>}
             </div>
           </div>
         </Card>
@@ -300,7 +300,7 @@ export default function DoctorConsole() {
               </ol>
               <p className="mt-5 text-xs text-muted leading-relaxed">
                 The signature commits to the encrypted content&apos;s hash. Only the hash, CID, and lifecycle live
-                on-chain — the prescription body stays encrypted off-chain.
+                on-chain - the prescription body stays encrypted off-chain.
               </p>
             </Card>
           )}

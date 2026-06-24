@@ -1,9 +1,9 @@
 // evaluation/gas-benchmark.ts
 //
-// Real gas benchmark for the e-prescription contracts (spec V7 — evaluation
+// Real gas benchmark for the e-prescription contracts (spec V7 - evaluation
 // methodology). Deploys the three registries on the in-process Hardhat network
 // and measures the ACTUAL gasUsed of every write operation by reading EACH
-// operation's OWN transaction receipt (no copy-pasted receipt — the plan's bug).
+// operation's OWN transaction receipt (no copy-pasted receipt - the plan's bug).
 //
 // Run: npx hardhat run evaluation/gas-benchmark.ts --network hardhat
 import hre from "hardhat";
@@ -142,7 +142,7 @@ async function main(): Promise<void> {
 
   // --- Report ----------------------------------------------------------------
   const width = Math.max(...rows.map((r) => r.op.length));
-  console.log("\n=== GAS BENCHMARK — e-prescription registries ===");
+  console.log("\n=== GAS BENCHMARK - e-prescription registries ===");
   console.log("Target: Hyperledger Besu IBFT 2.0 (free-gas), EVM Paris, optimizer runs=200\n");
   for (const r of rows) {
     console.log(`  ${r.op.padEnd(width)}   ${r.gas.toString().padStart(8)} gas`);

@@ -1,6 +1,6 @@
 // src/pages/patient/index.tsx
 //
-// Patient portal — look up your prescriptions from the read model and grant a
+// Patient portal - look up your prescriptions from the read model and grant a
 // pharmacy access to a prescription's key. The grant is delegated to the KMS
 // signer (the patient's custodian); the web tier never handles patient keys.
 import { useState } from "react";
@@ -69,7 +69,7 @@ export default function PatientPortal() {
   }
 
   return (
-    <AppShell role="patient" active="mine">
+    <AppShell role="patient" active="mine" title="My prescriptions">
       <div className="mb-6">
         <p className="eyebrow mb-1">Patient portal</p>
         <h1 className="text-2xl font-semibold tracking-tight">My prescriptions</h1>
@@ -77,9 +77,9 @@ export default function PatientPortal() {
 
       <Card className="p-5 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-end gap-3">
-          <Field label="Patient reference" className="flex-1" hint="Your on-chain ref (a salted hash — not your identity).">
+          <Field label="Patient reference" className="flex-1" hint="Your on-chain ref (a salted hash - not your identity).">
             <Input
-              placeholder="0x…"
+              placeholder="0x..."
               value={patientRef}
               onChange={(e) => setPatientRef(e.target.value.trim())}
               onKeyDown={(e) => e.key === "Enter" && load()}
@@ -87,7 +87,7 @@ export default function PatientPortal() {
             />
           </Field>
           <Button variant="secondary" onClick={load} disabled={loading}>
-            {loading ? "Loading…" : "Load"}
+            {loading ? "Loading..." : "Load"}
           </Button>
         </div>
       </Card>
@@ -116,7 +116,7 @@ export default function PatientPortal() {
                   <div>
                     <p className="eyebrow">Selected</p>
                     <p className="font-mono text-sm text-ink mt-1">
-                      {selected.prescriptionId.slice(0, 6)}…{selected.prescriptionId.slice(-4)}
+                      {selected.prescriptionId.slice(0, 6)}...{selected.prescriptionId.slice(-4)}
                     </p>
                   </div>
                   <StatusPill state={selected.state as 0 | 1 | 2 | 3 | 4 | 5} />
@@ -132,14 +132,14 @@ export default function PatientPortal() {
                   <p className="eyebrow">Grant pharmacy access</p>
                   <Field label="Pharmacy address">
                     <Input
-                      placeholder="0x…"
+                      placeholder="0x..."
                       value={pharmacy}
                       onChange={(e) => setPharmacy(e.target.value.trim())}
                       className="font-mono"
                     />
                   </Field>
                   <Button className="w-full" onClick={grant} disabled={granting}>
-                    {granting ? "Granting…" : "Grant access"}
+                    {granting ? "Granting..." : "Grant access"}
                   </Button>
                   <p className="text-xs text-muted leading-relaxed">
                     Your custodian re-wraps the key for the pharmacy. The web app never sees your private key.

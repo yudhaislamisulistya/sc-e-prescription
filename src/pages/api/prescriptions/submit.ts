@@ -10,17 +10,17 @@
 //      who authored the content actually signed THIS content).
 //   2. The signature commits to the REAL payloadHash recomputed from the
 //      supplied encrypted package (not a client-asserted hash, not a zero
-//      sentinel) — closing the integrity hole where a signature could be paired
+//      sentinel) - closing the integrity hole where a signature could be paired
 //      with arbitrary ciphertext.
 //   3. The on-chain-bound identifiers the caller asks us to act on
 //      (prescriptionId, patientRef) match the signed canonical payload.
 //
 // Only after ALL of those checks pass does it:
-//   4. Pin the EXACT encrypted bytes to IPFS (uploadPackage — no re-encryption,
+//   4. Pin the EXACT encrypted bytes to IPFS (uploadPackage - no re-encryption,
 //      so the pinned hash equals the signed hash).
 //   5. Read the patient's encryption pubkey from IdentityRegistry on-chain.
 //   6. ECIES-wrap the CEK for the patient.
-//   7. Return { cid, payloadHash, wrappedForPatient } — never any PII.
+//   7. Return { cid, payloadHash, wrappedForPatient } - never any PII.
 //
 // This is the authorization gate for the route: an unauthenticated caller
 // cannot get arbitrary content encrypted/pinned/wrapped because they cannot
@@ -28,7 +28,7 @@
 // issuePrescription + grantAccess calls are still made by the client with the
 // returned cid / payloadHash / wrappedForPatient.
 //
-// Root-level libs are imported via RELATIVE paths — the `@/*` alias maps to
+// Root-level libs are imported via RELATIVE paths - the `@/*` alias maps to
 // `src/`, and the root `lib/` directory has NO alias.
 import type { NextApiRequest, NextApiResponse } from "next";
 import {
@@ -128,7 +128,7 @@ export default async function handler(
 
   try {
     // -----------------------------------------------------------------------
-    // STEP A — Recompute the payloadHash from the supplied ciphertext. We never
+    // STEP A - Recompute the payloadHash from the supplied ciphertext. We never
     // trust a client-asserted hash; the hash is derived from the exact bytes we
     // will pin, so it is the value the signature must commit to.
     // -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ export default async function handler(
     const payloadHash = keccak256(pkgBytes);
 
     // -----------------------------------------------------------------------
-    // STEP B — Extract the signed fields from the canonical payload itself
+    // STEP B - Extract the signed fields from the canonical payload itself
     // (NOT from loose top-level body fields a caller could vary independently).
     // -----------------------------------------------------------------------
     const doctorAddress = (canonicalPayload as { doctor?: { address?: unknown } })
@@ -171,7 +171,7 @@ export default async function handler(
     }
 
     // -----------------------------------------------------------------------
-    // STEP C — Bind the request to the signed payload. The on-chain-bound
+    // STEP C - Bind the request to the signed payload. The on-chain-bound
     // identifiers the caller passes MUST equal those inside the signed payload,
     // otherwise a valid signature for payload X could be used to act on Y.
     // -----------------------------------------------------------------------
@@ -187,11 +187,11 @@ export default async function handler(
     }
 
     // -----------------------------------------------------------------------
-    // STEP D — THE INTEGRITY GATE. Reconstruct the exact EIP-712 message
+    // STEP D - THE INTEGRITY GATE. Reconstruct the exact EIP-712 message
     // (including the REAL payloadHash from STEP A) and recover the signer. The
     // signature is only accepted if it recovers to the doctor named in the
     // signed payload. This proves: (1) the doctor signed, and (2) the doctor
-    // signed THIS ciphertext (via payloadHash) — not a zero hash and not some
+    // signed THIS ciphertext (via payloadHash) - not a zero hash and not some
     // other content. Any mismatch between signature, content, doctor, or id is
     // rejected here before a single side effect occurs.
     // -----------------------------------------------------------------------
@@ -229,7 +229,7 @@ export default async function handler(
     }
 
     // -----------------------------------------------------------------------
-    // STEP E — Verified. Defense in depth: confirm the supplied CEK actually
+    // STEP E - Verified. Defense in depth: confirm the supplied CEK actually
     // decrypts the supplied package AND that the package's plaintext is the
     // canonical payload that was signed. This proves cek↔ciphertext↔payload
     // consistency before we wrap the CEK for the patient (a wrong CEK would

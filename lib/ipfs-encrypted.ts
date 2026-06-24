@@ -2,7 +2,7 @@
 //
 // Encrypted IPFS client for the e-prescription envelope scheme.
 //
-// Only ENCRYPTED package bytes are ever uploaded to IPFS — plaintext
+// Only ENCRYPTED package bytes are ever uploaded to IPFS - plaintext
 // prescription content never leaves the caller. The flow is:
 //
 //   plaintext --(AES-256-GCM under CEK)--> EncryptedPackage
@@ -15,7 +15,7 @@
 // is rejected without ever feeding it to the AES-GCM decipher.
 //
 // This module talks to a Kubo node over its HTTP API using the Node 22
-// global `fetch` / `FormData` / `Blob` — no Helia / IPFS-JS deps are used.
+// global `fetch` / `FormData` / `Blob` - no Helia / IPFS-JS deps are used.
 // Endpoints are env-driven (see C8):
 //   - IPFS_API_URL     (default http://localhost:5001) → /api/v0/add, /api/v0/pin/rm
 //   - IPFS_GATEWAY_URL (default http://localhost:8080)  → /ipfs/<cid>
@@ -67,7 +67,7 @@ export async function uploadPackage(
   const pkgBytes = packageToBytes(pkg);
   const payloadHash = keccak256(pkgBytes);
 
-  // Only the encrypted package bytes are uploaded — never plaintext.
+  // Only the encrypted package bytes are uploaded - never plaintext.
   const form = new FormData();
   form.append(
     "file",
@@ -127,11 +127,11 @@ export async function fetchAndDecrypt(
   }
   const pkgBytes = Buffer.from(await res.arrayBuffer());
 
-  // Integrity gate — verify BEFORE decrypting.
+  // Integrity gate - verify BEFORE decrypting.
   const actualHash = keccak256(pkgBytes);
   if (actualHash !== payloadHash) {
     throw new Error(
-      `payloadHash mismatch — ciphertext tampered (expected ${payloadHash}, got ${actualHash})`
+      `payloadHash mismatch - ciphertext tampered (expected ${payloadHash}, got ${actualHash})`
     );
   }
 

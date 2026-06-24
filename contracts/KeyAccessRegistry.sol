@@ -137,7 +137,7 @@ contract KeyAccessRegistry {
     function revokeAccess(bytes32 prescriptionId, bytes32 recipient) external {
         IPrescriptionRegistry.PrescriptionView memory p = prescriptionRegistry.getPrescription(prescriptionId);
 
-        // FINDING 2: same existence guard as grantAccess — never mutate access
+        // FINDING 2: same existence guard as grantAccess - never mutate access
         // state for a prescription that was never issued.
         if (p.state == IPrescriptionRegistry.State.None) revert PrescriptionDoesNotExist();
 
