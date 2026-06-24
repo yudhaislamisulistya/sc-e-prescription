@@ -23,7 +23,8 @@ import {
   type AbiEvent,
   type Log,
 } from "viem";
-import { Pool, type PoolClient } from "pg";
+import { type Pool, type PoolClient } from "pg";
+import { createPool } from "../../lib/pg-pool";
 
 // Mirror of IPrescriptionRegistry.State (kept for human-readable audit payloads).
 const STATE_NONE = 0;
@@ -94,7 +95,7 @@ function sleep(ms: number): Promise<void> {
 type PublicClient = ReturnType<typeof createPublicClient>;
 
 async function main(): Promise<void> {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const pool = createPool();
 
   const client = createPublicClient({
     transport: http(process.env.RPC_URL || "http://localhost:8545"),

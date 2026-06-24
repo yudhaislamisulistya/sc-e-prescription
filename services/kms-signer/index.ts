@@ -96,6 +96,18 @@ if (!identityRegistryAddressEnv) {
 }
 const IDENTITY_REGISTRY_ADDRESS = identityRegistryAddressEnv as `0x${string}`;
 
+// The KeyAccessRegistry is PINNED at startup from the environment. The custodian
+// EOA must only ever sign grantAccess to this single audited contract; accepting
+// a caller-supplied target would let any authenticated caller make the custodian
+// sign a transaction to an arbitrary contract address. Fail closed if unset.
+const keyAccessRegistryAddressEnv = process.env.KEY_ACCESS_REGISTRY_ADDRESS;
+if (!keyAccessRegistryAddressEnv) {
+  throw new Error(
+    "KEY_ACCESS_REGISTRY_ADDRESS not set (deployed KeyAccessRegistry address; the only contract this service is allowed to call)",
+  );
+}
+const KEY_ACCESS_REGISTRY_ADDRESS = keyAccessRegistryAddressEnv as `0x${string}`;
+
 const RPC_URL = process.env.RPC_URL || "http://localhost:8545";
 const PORT = Number(process.env.KMS_PORT || process.env.PORT || 4000);
 
@@ -179,8 +191,6 @@ interface GrantAccessRequest {
   pharmacyPubKeyHex?: string;
   /** Pharmacy EOA address — the authoritative identity for both auth + pubkey. */
   pharmacyAddr: `0x${string}`;
-  /** Deployed KeyAccessRegistry address. */
-  karAddress: `0x${string}`;
 }
 
 // --- Key boundary -------------------------------------------------------------
@@ -242,10 +252,9 @@ async function handleGrantAccess(body: string, res: ServerResponse): Promise<voi
     patientWrappedKeyHex,
     pharmacyPubKeyHex,
     pharmacyAddr,
-    karAddress,
   } = req;
 
-  if (!prescriptionId || !patientRef || !patientWrappedKeyHex || !pharmacyAddr || !karAddress) {
+  if (!prescriptionId || !patientRef || !patientWrappedKeyHex || !pharmacyAddr) {
     sendJson(res, 400, { error: "Missing required field" });
     return;
   }
@@ -303,9 +312,10 @@ async function handleGrantAccess(body: string, res: ServerResponse): Promise<voi
   const wrappedForPharmacy = wrapCEK(onChainPubKeyBytes, cek);
   const pharmacyRef = addrToRecipientBytes32(pharmacyAddr);
 
-  // 5. Submit grantAccess, signed by the custodian EOA.
+  // 5. Submit grantAccess to the PINNED KeyAccessRegistry, signed by the
+  //    custodian EOA. The target address is never caller-controlled.
   const hash = await walletClient.writeContract({
-    address: karAddress,
+    address: KEY_ACCESS_REGISTRY_ADDRESS,
     abi: KEY_ACCESS_REGISTRY_ABI,
     functionName: "grantAccess",
     args: [

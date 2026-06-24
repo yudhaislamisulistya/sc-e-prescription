@@ -17,17 +17,22 @@ p2p-port = 30304
 # which docker-compose mounts into this node's data-path
 # (/data/besu-rpc/static-nodes.json) — Besu auto-loads it from there.
 # The enode host is the compose service DNS name "besu-validator"; enable DNS so
-# Besu resolves it to the container IP at dial time.
+# Besu resolves it to the container IP at dial time. Xdns-* govern OUTBOUND enode
+# resolution only and do NOT require relaxing the inbound Host-header check.
 Xdns-enabled = true
 Xdns-update-enabled = true
-host-allowlist = ["*"]
+# host-allowlist gates the inbound HTTP Host header. A wildcard ["*"] enables DNS
+# rebinding against the RPC, so restrict it to the names clients actually use:
+# the compose service DNS name and loopback (host tooling / Hardhat).
+host-allowlist = ["besu-rpc", "localhost", "127.0.0.1"]
 
-# JSON-RPC
+# JSON-RPC. ADMIN/DEBUG/MINER are intentionally NOT exposed. CORS is restricted
+# to the app origin (the app calls RPC server-side; browser dApps use this list).
 rpc-http-enabled = true
 rpc-http-host = "0.0.0.0"
 rpc-http-port = 8545
 rpc-http-api = ["ETH", "NET", "WEB3", "IBFT"]
-rpc-http-cors-origins = ["*"]
+rpc-http-cors-origins = ["http://localhost:3000"]
 
 # Free-gas consortium: report/accept a zero gas price so dApp clients and
 # Hardhat ("besu" network, gasPrice: 0) can submit zero-cost transactions.

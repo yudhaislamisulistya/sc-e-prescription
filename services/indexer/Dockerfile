@@ -13,8 +13,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev --legacy-peer-deps
 
-# Copy the indexer service source.
+# Copy the indexer service source and the shared lib it imports
+# (services/indexer/index.ts imports the pg-pool factory from ../../lib/pg-pool).
 COPY services/indexer/ ./services/indexer/
+COPY lib/ ./lib/
 
 # Run the TS entrypoint with tsx. tsx is a standalone esbuild-based runner that
 # transpiles+executes TypeScript directly and resolves ESM/CJS transparently, so
