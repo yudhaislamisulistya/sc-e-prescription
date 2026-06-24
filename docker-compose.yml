@@ -195,6 +195,8 @@ services:
       IDENTITY_REGISTRY_ADDRESS: ${IDENTITY_REGISTRY_ADDRESS:?set IDENTITY_REGISTRY_ADDRESS in .env (deployed IdentityRegistry address)}
       # prepare/submit bind the doctor's EIP-712 signature to this registry.
       PRESCRIPTION_REGISTRY_ADDRESS: ${PRESCRIPTION_REGISTRY_ADDRESS:?set PRESCRIPTION_REGISTRY_ADDRESS in .env (deployed PrescriptionRegistry address)}
+      # key-access/grant reads the patient-wrapped CEK from this registry.
+      KEY_ACCESS_REGISTRY_ADDRESS: ${KEY_ACCESS_REGISTRY_ADDRESS:?set KEY_ACCESS_REGISTRY_ADDRESS in .env (deployed KeyAccessRegistry address)}
     ports:
       - "3000:3000"
     depends_on: [besu-rpc, postgres, redis, indexer]
