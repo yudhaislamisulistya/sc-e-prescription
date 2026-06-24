@@ -1,19 +1,81 @@
 @import "tailwindcss";
 
-:root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+/* ===========================================================================
+   Clinical Trust — design tokens
+   A permissioned-ledger e-prescription system. Light, calm, medical-grade.
+   Teal is the single brand accent; the lifecycle status colours are treated as
+   information (each on-chain State has one learnable colour). On-chain data is
+   always set in the mono face — the typographic signature of a verifiable ledger.
+   =========================================================================== */
+@theme {
+  /* Surfaces & ink */
+  --color-paper: #f5f8f8;
+  --color-card: #ffffff;
+  --color-ink: #0e1b21;
+  --color-muted: #5a6b72;
+  --color-faint: #8a979d;
+  --color-line: #e3eaec;
+  --color-line-strong: #cfdadd;
+
+  /* Brand accent */
+  --color-teal: #0f766e;
+  --color-teal-deep: #0b5a54;
+  --color-teal-tint: #e8f2f0;
+
+  /* Lifecycle status palette (mirrors IPrescriptionRegistry.State) */
+  --color-st-issued: #1d6fe0;
+  --color-st-partial: #b45309;
+  --color-st-full: #15803d;
+  --color-st-expired: #64748b;
+  --color-st-revoked: #c8312b;
+
+  /* Back-compat aliases for any legacy utilities */
+  --color-background: var(--color-paper);
+  --color-foreground: var(--color-ink);
+
+  /* Type */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+    sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+
+  /* Radii */
+  --radius-card: 0.875rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root {
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Eyebrow / lab-label treatment: uppercase, tracked, mono. */
+.eyebrow {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--color-muted);
+}
+
+/* Visible keyboard focus everywhere (quality floor). */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }

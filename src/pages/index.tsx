@@ -1,80 +1,150 @@
-"use client";
+import Link from "next/link";
+import { Card } from "@/components/ui/Card";
+import { StatusPill } from "@/components/ui/StatusPill";
+import { LifecycleSpine } from "@/components/ui/LifecycleSpine";
+import { cn } from "@/components/ui/cn";
 
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { Geist, Geist_Mono } from "next/font/google";
-import { useState } from "react";
+const ROLES: { href: string; title: string; line: string; enabled: boolean }[] = [
+  { href: "/doctor", title: "Doctor", line: "Issue & sign prescriptions", enabled: false },
+  { href: "/pharmacist", title: "Pharmacist", line: "Verify & dispense units", enabled: false },
+  { href: "/patient", title: "Patient", line: "View & grant pharmacy access", enabled: false },
+  { href: "/admin", title: "Administrator", line: "Manage the on-chain registry", enabled: false },
+];
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const STATS: [string, string][] = [
+  ["7", "weaknesses mitigated"],
+  ["3", "on-chain registries"],
+  ["0", "PII on the ledger"],
+];
 
 export default function Home() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleEnterDoctor = async () => {
-    setIsLoading(true);
-    // Bisa tambahkan delay kalau ingin melihat loading
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    router.push("/doctor/create-recipe");
-  };
-
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
+    <div className="min-h-screen bg-paper flex flex-col">
+      <header className="mx-auto w-full max-w-6xl px-5 h-14 flex items-center gap-2">
+        <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-teal text-white font-mono text-sm font-bold">
+          ℞
+        </span>
+        <span className="font-semibold tracking-tight">e‑Prescription</span>
+        <span className="eyebrow ml-1 hidden sm:inline">Smart-contract redesign</span>
+      </header>
 
-        {/* Tombol dengan loading */}
-        <button
-          onClick={handleEnterDoctor}
-          disabled={isLoading}
-          className={`relative flex items-center justify-center bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white rounded-full px-6 py-3 text-sm font-medium shadow-md transition-all ${
-            isLoading ? "opacity-70 cursor-not-allowed" : "hover:brightness-110"
-          }`}
-        >
-          {isLoading ? (
-            <div className="flex items-center gap-2">
-              <span className="loader w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-              Loading...
+      <main className="mx-auto w-full max-w-6xl px-5 flex-1">
+        {/* hero */}
+        <section className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center py-12 lg:py-20">
+          <div>
+            <p className="eyebrow mb-4">Permissioned ledger · Besu IBFT 2.0</p>
+            <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.05]">
+              Prescriptions you can <span className="text-teal">prove</span>.
+            </h1>
+            <p className="mt-5 text-muted text-lg max-w-md leading-relaxed">
+              Every prescription is signed by its doctor, encrypted end‑to‑end, and tracked through a
+              tamper‑evident lifecycle — from issued to dispensed — on a consortium blockchain.
+            </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <a
+                href="#roles"
+                className="inline-flex h-11 items-center rounded-lg bg-teal px-5 text-white font-medium hover:bg-teal-deep transition-colors"
+              >
+                Choose a role
+              </a>
+              <a
+                href="#how"
+                className="inline-flex h-11 items-center rounded-lg border border-line-strong px-5 font-medium hover:border-teal hover:text-teal transition-colors"
+              >
+                How it works
+              </a>
             </div>
-          ) : (
-            "Enter to Doctor"
-          )}
-        </button>
+            <dl className="mt-10 grid grid-cols-3 gap-4 max-w-md">
+              {STATS.map(([n, l]) => (
+                <div key={l}>
+                  <dd className="font-mono text-2xl text-ink">{n}</dd>
+                  <dt className="text-xs text-muted mt-0.5 leading-snug">{l}</dt>
+                </div>
+              ))}
+            </dl>
+          </div>
 
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/pages/index.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+          {/* signature: live lifecycle card */}
+          <Card className="p-6">
+            <div className="flex items-start justify-between mb-5">
+              <div>
+                <p className="eyebrow">Prescription</p>
+                <p className="font-mono text-sm text-ink mt-1">0x9f2a…41c7</p>
+              </div>
+              <StatusPill state={2} />
+            </div>
+            <LifecycleSpine
+              state={2}
+              totalUnits={30}
+              dispensedUnits={10}
+              cid="bafybeigdyr…fbzdi"
+              payloadHash="0xaa31…9c0e"
+            />
+            <p className="mt-5 text-xs text-muted">
+              Live example — the same lifecycle view every role sees, read straight from the chain.
+            </p>
+          </Card>
+        </section>
+
+        {/* roles */}
+        <section id="roles" className="py-12 border-t border-line">
+          <p className="eyebrow mb-2">Enter the console</p>
+          <h2 className="text-2xl font-semibold tracking-tight mb-6">Choose your role</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {ROLES.map((r) => (
+              <RoleCard key={r.title} {...r} />
+            ))}
+          </div>
+          <p className="mt-4 text-xs text-muted">
+            Consoles are being rebuilt on the redesigned backend — enabled one role at a time.
+          </p>
+        </section>
+
+        {/* how it works */}
+        <section id="how" className="py-12 border-t border-line">
+          <p className="eyebrow mb-2">From signature to dispense</p>
+          <h2 className="text-2xl font-semibold tracking-tight mb-6">How a prescription moves</h2>
+          <ol className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              ["Issue", "The doctor signs the prescription (EIP‑712). It is encrypted and pinned; only its hash and lifecycle live on-chain."],
+              ["Grant", "Keys are wrapped per recipient. The patient's custodian re‑wraps the key for the chosen pharmacy — no plaintext leaves the boundary."],
+              ["Dispense", "The pharmacist dispenses units. On-chain accounting makes double‑dispensing impossible across the consortium."],
+              ["Audit", "Every transition is an event, projected into a read model — a complete, tamper‑evident trail."],
+            ].map(([title, body], i) => (
+              <li key={title}>
+                <Card className="p-5 h-full">
+                  <span className="font-mono text-xs text-teal">{String(i + 1).padStart(2, "0")}</span>
+                  <h3 className="font-semibold mt-2">{title}</h3>
+                  <p className="text-sm text-muted mt-1.5 leading-relaxed">{body}</p>
+                </Card>
+              </li>
+            ))}
+          </ol>
+        </section>
       </main>
 
-      <footer className="row-start-3 text-sm text-gray-500 dark:text-gray-400">
-        Developed by YIS
+      <footer className="border-t border-line py-6 text-center">
+        <p className="eyebrow">Universitas Gadjah Mada · thesis prototype · YIS</p>
       </footer>
     </div>
+  );
+}
+
+function RoleCard({ href, title, line, enabled }: { href: string; title: string; line: string; enabled: boolean }) {
+  const inner = (
+    <Card className={cn("p-5 h-full transition-all", enabled ? "hover:border-teal hover:shadow-md" : "opacity-60")}>
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold">{title}</h3>
+        <span className={cn("text-sm font-mono", enabled ? "text-teal" : "text-faint")}>{enabled ? "→" : "soon"}</span>
+      </div>
+      <p className="text-sm text-muted mt-1">{line}</p>
+    </Card>
+  );
+  return enabled ? (
+    <Link href={href} className="block">
+      {inner}
+    </Link>
+  ) : (
+    <div aria-disabled="true">{inner}</div>
   );
 }
