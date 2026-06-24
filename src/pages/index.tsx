@@ -5,7 +5,7 @@ import { LifecycleSpine } from "@/components/ui/LifecycleSpine";
 import { cn } from "@/components/ui/cn";
 
 const ROLES: { href: string; title: string; line: string; enabled: boolean }[] = [
-  { href: "/doctor", title: "Doctor", line: "Issue & sign prescriptions", enabled: false },
+  { href: "/doctor", title: "Doctor", line: "Issue & sign prescriptions", enabled: true },
   { href: "/pharmacist", title: "Pharmacist", line: "Verify & dispense units", enabled: false },
   { href: "/patient", title: "Patient", line: "View & grant pharmacy access", enabled: false },
   { href: "/admin", title: "Administrator", line: "Manage the on-chain registry", enabled: false },
