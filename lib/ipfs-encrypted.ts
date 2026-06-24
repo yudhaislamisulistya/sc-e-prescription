@@ -49,18 +49,21 @@ interface KuboAddResponse {
 }
 
 /**
- * Encrypt `plaintext` under `cek` (AES-256-GCM), serialize the resulting
- * package to its canonical bytes, compute the on-chain `payloadHash`
- * (keccak256 over those exact bytes), and pin the bytes to IPFS.
+ * Pin an ALREADY-encrypted package to IPFS without re-encrypting it.
  *
- * Returns the IPFS `cid`, the `payloadHash` to anchor on-chain, and the
- * in-memory `encryptedPackage` (handy for tests / re-pinning).
+ * This is the integrity-preserving path used by the prepare/submit flow: the
+ * package (and therefore its random IV) was produced in `prepare`, the doctor's
+ * EIP-712 signature commits to its `payloadHash`, and `submit` must pin the
+ * EXACT same bytes so the on-chain hash matches what was signed. Re-encrypting
+ * (as `encryptAndUpload` does) would mint a fresh IV and a different hash,
+ * silently breaking the signature→content binding.
+ *
+ * Returns the IPFS `cid` and the `payloadHash` (keccak256 over the canonical
+ * package bytes) to anchor on-chain.
  */
-export async function encryptAndUpload(
-  plaintext: Buffer,
-  cek: Buffer
-): Promise<UploadResult> {
-  const pkg = encrypt(cek, plaintext);
+export async function uploadPackage(
+  pkg: EncryptedPackage
+): Promise<{ cid: string; payloadHash: `0x${string}` }> {
   const pkgBytes = packageToBytes(pkg);
   const payloadHash = keccak256(pkgBytes);
 
@@ -85,6 +88,23 @@ export async function encryptAndUpload(
     throw new Error("IPFS upload failed: response missing Hash (cid)");
   }
 
+  return { cid, payloadHash };
+}
+
+/**
+ * Encrypt `plaintext` under `cek` (AES-256-GCM), serialize the resulting
+ * package to its canonical bytes, compute the on-chain `payloadHash`
+ * (keccak256 over those exact bytes), and pin the bytes to IPFS.
+ *
+ * Returns the IPFS `cid`, the `payloadHash` to anchor on-chain, and the
+ * in-memory `encryptedPackage` (handy for tests / re-pinning).
+ */
+export async function encryptAndUpload(
+  plaintext: Buffer,
+  cek: Buffer
+): Promise<UploadResult> {
+  const pkg = encrypt(cek, plaintext);
+  const { cid, payloadHash } = await uploadPackage(pkg);
   return { cid, payloadHash, encryptedPackage: pkg };
 }
 
