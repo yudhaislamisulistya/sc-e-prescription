@@ -68,3 +68,4 @@ infra/besu/networkFiles/
 infra/besu/ibftConfigFile.json
 # static-nodes.json is host-specific (contains the validator enode after key gen).
 infra/besu/static-nodes.json
+.gstack/
