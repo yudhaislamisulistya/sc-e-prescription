@@ -9,6 +9,8 @@ import {
   createWalletClient,
   custom,
   http,
+  keccak256,
+  toBytes,
   type Chain,
   type EIP1193Provider,
 } from "viem";
@@ -124,6 +126,54 @@ export const KEY_ACCESS_REGISTRY_ABI = [
     outputs: [],
   },
 ] as const;
+
+export const IDENTITY_REGISTRY_ABI = [
+  {
+    name: "registerActor",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "actor", type: "address" },
+      { name: "role", type: "bytes32" },
+      { name: "licenseHash", type: "bytes32" },
+      { name: "institutionId", type: "bytes32" },
+      { name: "encryptionPubKey", type: "bytes" },
+    ],
+    outputs: [],
+  },
+  {
+    name: "registerPatient",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "patientRef", type: "bytes32" },
+      { name: "encryptionPubKey", type: "bytes" },
+      { name: "custodian", type: "address" },
+    ],
+    outputs: [],
+  },
+  {
+    name: "setActorStatus",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "actor", type: "address" },
+      { name: "status", type: "uint8" },
+    ],
+    outputs: [],
+  },
+] as const;
+
+// Role identifiers match the contract's keccak256("<NAME>") constants.
+export const ROLE_NAMES = {
+  DOCTOR_ROLE: "DOCTOR_ROLE",
+  PHARMACIST_ROLE: "PHARMACIST_ROLE",
+  PATIENT_CUSTODIAN_ROLE: "PATIENT_CUSTODIAN_ROLE",
+} as const;
+
+export function roleHash(name: string): `0x${string}` {
+  return keccak256(toBytes(name));
+}
 
 /** Encode an EOA as the bytes32 recipient slot the KeyAccessRegistry expects. */
 export function addrToRecipient(addr: string): `0x${string}` {

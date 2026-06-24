@@ -20,7 +20,7 @@ const NAV: Record<Role, { key: string; label: string; href: string }[]> = {
   patient: [{ key: "mine", label: "My prescriptions", href: "/patient" }],
   admin: [
     { key: "actors", label: "Registry", href: "/admin" },
-    { key: "ledger", label: "Ledger", href: "/admin/ledger" },
+    { key: "ledger", label: "Ledger", href: "/dashboard" },
   ],
 };
 
