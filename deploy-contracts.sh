@@ -29,7 +29,14 @@ DEPLOYER_FILE="infra/besu/deployer-private-key.txt"
 [ -f "$DEPLOYER_FILE" ] || { echo "ERROR: $DEPLOYER_FILE missing - run ./bootstrap.sh first." >&2; exit 1; }
 DEPLOYER_PK="$(tr -d '[:space:]' < "$DEPLOYER_FILE")"
 
-[ -d node_modules ] || { echo "==> npm install"; npm install; }
+# hardhat-toolbox-viem@3 peer-depends on hardhat-gas-reporter@^1 while we use @2,
+# so a strict install errors with ERESOLVE; --legacy-peer-deps accepts it (same
+# as the service Dockerfiles). Check for the hardhat binary so a partial install
+# from a failed run is repaired.
+if [ ! -x node_modules/.bin/hardhat ]; then
+  echo "==> npm install (legacy-peer-deps)"
+  npm install --legacy-peer-deps
+fi
 
 # Admin EOA for the registry (defaults to the deployer address).
 ADMIN="${ADMIN_ADDRESS:-}"
