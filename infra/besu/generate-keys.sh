@@ -79,25 +79,32 @@ fi
 GEN_GENESIS="${OUT_DIR}/genesis.json"
 VALIDATOR_KEY_DST="${SCRIPT_DIR}/validator-key"
 
-# The besu operator tool REFUSES to write into an existing --to directory, so a
-# partial/interrupted run leaves networkFiles/ behind and blocks every retry with
-# "Output directory already exists". Regenerate from a clean slate unless we
-# already have the final outputs (validator key + generated genesis).
+# Generate the validator set + genesis. The operator tool fails with "Output
+# directory already exists" when --to points at a bind-mounted path that Docker
+# (or a prior run) created, and besu runs as a non-root user that cannot write
+# the root-owned mount. To be bulletproof: generate into a CONTAINER-LOCAL temp
+# dir and copy the result onto the host, running the container as root. Skip
+# entirely if the final outputs already exist.
 if [ -f "${VALIDATOR_KEY_DST}" ] && [ -f "${GEN_GENESIS}" ]; then
   echo "==> validator-key + generated genesis already present; skipping operator tool."
+elif [ -n "${BESU_CMD}" ]; then
+  rm -rf "${OUT_DIR}"
+  echo "==> Running operator tool (local besu) ..."
+  ${BESU_CMD} operator generate-blockchain-config \
+    --config-file="${IBFT_CONFIG}" --to="${OUT_DIR}" --private-key-file-name=key
 else
-  if [ -d "${OUT_DIR}" ]; then
-    echo "==> Removing stale ${OUT_DIR} (previous run was incomplete)."
-    rm -rf "${OUT_DIR}"
-  fi
-  echo "==> Running 'besu operator generate-blockchain-config' ..."
-  if [ -n "${BESU_CMD}" ]; then
-    run_besu operator generate-blockchain-config \
-      --config-file="${IBFT_CONFIG}" --to="${OUT_DIR}" --private-key-file-name=key
-  else
-    run_besu operator generate-blockchain-config \
-      --config-file=/work/ibftConfigFile.json --to=/work/networkFiles --private-key-file-name=key
-  fi
+  rm -rf "${OUT_DIR}"
+  echo "==> Running operator tool (docker: generate-to-temp + copy) ..."
+  docker run --rm -u 0:0 -v "${SCRIPT_DIR}:/work" --entrypoint /bin/sh "${BESU_IMAGE}" -c '
+    set -e
+    BESU_BIN="$(command -v besu 2>/dev/null || true)"
+    [ -n "$BESU_BIN" ] || BESU_BIN=/opt/besu/bin/besu
+    rm -rf /tmp/besu-nf
+    "$BESU_BIN" operator generate-blockchain-config \
+      --config-file=/work/ibftConfigFile.json --to=/tmp/besu-nf --private-key-file-name=key
+    rm -rf /work/networkFiles
+    cp -a /tmp/besu-nf /work/networkFiles
+  '
 fi
 
 if [ ! -f "${GEN_GENESIS}" ]; then
