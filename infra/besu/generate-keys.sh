@@ -76,9 +76,20 @@ if [ ! -f "${IBFT_CONFIG}" ]; then
 JSON
 fi
 
-if [ -d "${OUT_DIR}" ]; then
-  echo "==> ${OUT_DIR} exists; reusing (delete it to regenerate)."
+GEN_GENESIS="${OUT_DIR}/genesis.json"
+VALIDATOR_KEY_DST="${SCRIPT_DIR}/validator-key"
+
+# The besu operator tool REFUSES to write into an existing --to directory, so a
+# partial/interrupted run leaves networkFiles/ behind and blocks every retry with
+# "Output directory already exists". Regenerate from a clean slate unless we
+# already have the final outputs (validator key + generated genesis).
+if [ -f "${VALIDATOR_KEY_DST}" ] && [ -f "${GEN_GENESIS}" ]; then
+  echo "==> validator-key + generated genesis already present; skipping operator tool."
 else
+  if [ -d "${OUT_DIR}" ]; then
+    echo "==> Removing stale ${OUT_DIR} (previous run was incomplete)."
+    rm -rf "${OUT_DIR}"
+  fi
   echo "==> Running 'besu operator generate-blockchain-config' ..."
   if [ -n "${BESU_CMD}" ]; then
     run_besu operator generate-blockchain-config \
@@ -89,14 +100,12 @@ else
   fi
 fi
 
-GEN_GENESIS="${OUT_DIR}/genesis.json"
 if [ ! -f "${GEN_GENESIS}" ]; then
   echo "ERROR: operator-tool did not produce ${GEN_GENESIS}." >&2
   exit 1
 fi
 
 # Install the validator key (mounted at /cfg/key by docker-compose).
-VALIDATOR_KEY_DST="${SCRIPT_DIR}/validator-key"
 if [ -f "${VALIDATOR_KEY_DST}" ]; then
   echo "==> validator-key present (not overwriting)."
 else
