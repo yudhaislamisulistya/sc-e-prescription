@@ -95,10 +95,10 @@ export default function PharmacistConsole() {
 
   async function dispense() {
     if (!rx) return;
-    if (!address) return toast.warning("Connect your wallet first.");
+    if (!address) return toast.warning(t("pharmacist.toast.connectFirst"));
     const u = Number(units);
     if (!Number.isInteger(u) || u <= 0 || u > remaining) {
-      return toast.warning(`Enter 1-${remaining} units.`);
+      return toast.warning(t("pharmacist.toast.dispenseRange", { n: remaining }));
     }
     setBusy(true);
     try {

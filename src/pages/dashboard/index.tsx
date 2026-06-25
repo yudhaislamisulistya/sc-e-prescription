@@ -91,7 +91,7 @@ export default function Dashboard() {
 
       {/* list */}
       {loading ? (
-        <Card className="p-8 text-center text-sm text-muted">Loading...</Card>
+        <Card className="p-8 text-center text-sm text-muted">{t("dashboard.loading")}</Card>
       ) : rows && rows.length > 0 ? (
         <div className="space-y-3">
           {rows.map((rx) => (

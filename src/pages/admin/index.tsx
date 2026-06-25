@@ -96,9 +96,9 @@ export default function AdminConsole() {
 
   async function registerPatient() {
     if (!guard()) return;
-    if (!BYTES32_RE.test(patientRef)) return toast.warning("Patient ref must be bytes32.");
-    if (!HEX_RE.test(patientPubKey) || patientPubKey.length < 4) return toast.warning("Encryption pubkey must be 0x hex.");
-    if (!ADDR_RE.test(custodian)) return toast.warning("Invalid custodian address.");
+    if (!BYTES32_RE.test(patientRef)) return toast.warning(t("admin.toast.patientRefBytes32"));
+    if (!HEX_RE.test(patientPubKey) || patientPubKey.length < 4) return toast.warning(t("admin.toast.pubkeyHex"));
+    if (!ADDR_RE.test(custodian)) return toast.warning(t("admin.toast.invalidCustodian"));
     setBusyPatient(true);
     try {
       const hash = await walletClient().writeContract({
@@ -110,10 +110,10 @@ export default function AdminConsole() {
         chain: besuChain,
       });
       await publicClient().waitForTransactionReceipt({ hash });
-      toast.success("Patient registered.");
+      toast.success(t("admin.toast.patientRegistered"));
       setPatientRef("");
     } catch (err) {
-      toast.error((err as Error).message || "registerPatient failed.");
+      toast.error((err as Error).message || t("admin.toast.patientFailed"));
     } finally {
       setBusyPatient(false);
     }

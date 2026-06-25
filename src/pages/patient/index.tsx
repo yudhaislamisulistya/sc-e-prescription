@@ -79,7 +79,7 @@ export default function PatientPortal() {
 
       <Card className="p-5 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-end gap-3">
-          <Field label="Patient reference" className="flex-1" hint="Your on-chain ref (a salted hash - not your identity).">
+          <Field label={t("patient.fields.patientRef.label")} className="flex-1" hint={t("patient.fields.patientRef.hint")}>
             <Input
               placeholder="0x..."
               value={patientRef}
@@ -89,7 +89,7 @@ export default function PatientPortal() {
             />
           </Field>
           <Button variant="secondary" onClick={load} disabled={loading}>
-            {loading ? "Loading..." : "Load"}
+            {loading ? t("patient.buttons.loading") : t("patient.buttons.load")}
           </Button>
         </div>
       </Card>

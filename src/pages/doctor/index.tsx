@@ -77,15 +77,15 @@ export default function DoctorConsole() {
   }, [patientRef, totalUnits, t]);
 
   async function handleIssue() {
-    if (!address) return toast.warning("Connect your wallet first.");
-    if (!configured) return toast.error("Contract addresses are not configured.");
-    if (!BYTES32_RE.test(patientRef)) return toast.warning("Enter a valid patient ref (bytes32).");
-    if (!medName.trim()) return toast.warning("Add at least the medication name.");
+    if (!address) return toast.warning(t("doctor.toast.connectFirst"));
+    if (!configured) return toast.error(t("doctor.toast.notConfigured"));
+    if (!BYTES32_RE.test(patientRef)) return toast.warning(t("doctor.toast.invalidPatientRef"));
+    if (!medName.trim()) return toast.warning(t("doctor.toast.medRequired"));
     const units = Number(totalUnits);
     const refillsN = Number(refills);
     const expiryUnix = Math.floor(new Date(expiresAt).getTime() / 1000);
     if (!Number.isFinite(expiryUnix) || expiryUnix <= Math.floor(Date.now() / 1000)) {
-      return toast.warning("Expiry must be in the future.");
+      return toast.warning(t("doctor.toast.expiryFuture"));
     }
 
     setBusy(true);
