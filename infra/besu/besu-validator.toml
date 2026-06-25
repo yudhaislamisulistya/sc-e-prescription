@@ -5,7 +5,12 @@
 # This node seals blocks but does NOT expose a public JSON-RPC endpoint;
 # all external RPC traffic goes through the besu-rpc node instead.
 
-data-path = "/data/besu"
+# Write straight into the mounted volume root. The named volume mounts at /data,
+# so this directory is guaranteed to exist; a subdirectory like /data/besu is NOT
+# auto-created and Besu writes VERSION_METADATA.json before creating it, crashing
+# with "No such file or directory" (the besu-rpc node only avoids this because its
+# static-nodes.json bind mount happens to pre-create /data/besu-rpc).
+data-path = "/data"
 genesis-file = "/cfg/genesis.json"
 
 # Validator signing key (one of the addresses encoded in genesis extraData).
