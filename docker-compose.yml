@@ -135,6 +135,9 @@ services:
       context: .
       dockerfile: services/indexer/Dockerfile
     container_name: sc_e_prescription_indexer
+    # App tier: only starts when the "app" profile is active (after contracts are
+    # deployed and addresses are in .env). Enable via COMPOSE_PROFILES=app.
+    profiles: ["app"]
     environment:
       RPC_URL: http://besu-rpc:8545
       # DB: host/user/db via PG* env; password read from the pg_password file
@@ -143,10 +146,10 @@ services:
       PGUSER: app
       PGDATABASE: eprescription
       REDIS_URL: redis://redis:6379
-      # REQUIRED: index.ts throws "PRESCRIPTION_REGISTRY_ADDRESS not set" at
-      # startup without this, and `restart: unless-stopped` would crash-loop it
-      # forever. Set it in the gitignored .env after deploying the contracts.
-      PRESCRIPTION_REGISTRY_ADDRESS: ${PRESCRIPTION_REGISTRY_ADDRESS:?set PRESCRIPTION_REGISTRY_ADDRESS in .env (deployed PrescriptionRegistry address)}
+      # Set in .env after deploying the contracts (see DEPLOY.md). The app-tier
+      # services only start under the "app" compose profile, so this empty
+      # default never boots a crash-looping container before the address exists.
+      PRESCRIPTION_REGISTRY_ADDRESS: ${PRESCRIPTION_REGISTRY_ADDRESS:-}
       # Skip scanning from genesis on a fresh DB: start at the contract's deploy
       # block. Defaults to 0 (whole chain) if unset.
       START_BLOCK: ${START_BLOCK:-0}
@@ -163,6 +166,7 @@ services:
       context: .
       dockerfile: services/kms-signer/Dockerfile
     container_name: sc_e_prescription_kms_signer
+    profiles: ["app"]
     environment:
       # Keep the dev-only patient-key env fallback HARD-DISABLED in this stack:
       # the service throws if it reaches getPatientPrivKey under production, so a
@@ -175,10 +179,10 @@ services:
       # Authoritative identity contract: used to verify the pharmacist's ACTIVE
       # PHARMACIST_ROLE and to fetch the on-chain encryption pubkey that the CEK
       # is re-wrapped to. Without this the wrap target would be caller-controlled.
-      IDENTITY_REGISTRY_ADDRESS: ${IDENTITY_REGISTRY_ADDRESS:?set IDENTITY_REGISTRY_ADDRESS in .env (deployed IdentityRegistry address)}
+      IDENTITY_REGISTRY_ADDRESS: ${IDENTITY_REGISTRY_ADDRESS:-}
       # The single KeyAccessRegistry the custodian EOA is allowed to call. Pinned
       # here so the service never signs grantAccess to a caller-supplied address.
-      KEY_ACCESS_REGISTRY_ADDRESS: ${KEY_ACCESS_REGISTRY_ADDRESS:?set KEY_ACCESS_REGISTRY_ADDRESS in .env (deployed KeyAccessRegistry address)}
+      KEY_ACCESS_REGISTRY_ADDRESS: ${KEY_ACCESS_REGISTRY_ADDRESS:-}
       # KMS_SERVICE_KEY and KMS_INTERNAL_TOKEN are provided as FILE secrets below;
       # the service reads /run/secrets/<name> directly (no env export needed).
     depends_on: [besu-rpc, postgres]
@@ -188,8 +192,19 @@ services:
 
   # --- Next.js application -----------------------------------------------------
   nextjs-app:
-    build: .
+    build:
+      context: .
+      # NEXT_PUBLIC_* are inlined into the browser bundle at build time. Set them
+      # in .env (the browser must be able to reach NEXT_PUBLIC_RPC_URL for the
+      # wallet/on-chain features; the in-cluster besu-rpc is loopback-only).
+      args:
+        NEXT_PUBLIC_CHAIN_ID: ${NEXT_PUBLIC_CHAIN_ID:-1337}
+        NEXT_PUBLIC_RPC_URL: ${NEXT_PUBLIC_RPC_URL:-}
+        NEXT_PUBLIC_IDENTITY_REGISTRY_ADDRESS: ${NEXT_PUBLIC_IDENTITY_REGISTRY_ADDRESS:-}
+        NEXT_PUBLIC_PRESCRIPTION_REGISTRY_ADDRESS: ${NEXT_PUBLIC_PRESCRIPTION_REGISTRY_ADDRESS:-}
+        NEXT_PUBLIC_KEY_ACCESS_REGISTRY_ADDRESS: ${NEXT_PUBLIC_KEY_ACCESS_REGISTRY_ADDRESS:-}
     container_name: sc_e_prescription_nextjs_app
+    profiles: ["app"]
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_CHAIN_ID: "1337"
@@ -203,11 +218,11 @@ services:
       IPFS_API_URL: http://ipfs:5001
       IPFS_GATEWAY_URL: http://ipfs:8080
       KMS_SIGNER_URL: http://kms-signer:4000
-      IDENTITY_REGISTRY_ADDRESS: ${IDENTITY_REGISTRY_ADDRESS:?set IDENTITY_REGISTRY_ADDRESS in .env (deployed IdentityRegistry address)}
+      IDENTITY_REGISTRY_ADDRESS: ${IDENTITY_REGISTRY_ADDRESS:-}
       # prepare/submit bind the doctor's EIP-712 signature to this registry.
-      PRESCRIPTION_REGISTRY_ADDRESS: ${PRESCRIPTION_REGISTRY_ADDRESS:?set PRESCRIPTION_REGISTRY_ADDRESS in .env (deployed PrescriptionRegistry address)}
+      PRESCRIPTION_REGISTRY_ADDRESS: ${PRESCRIPTION_REGISTRY_ADDRESS:-}
       # key-access/grant reads the patient-wrapped CEK from this registry.
-      KEY_ACCESS_REGISTRY_ADDRESS: ${KEY_ACCESS_REGISTRY_ADDRESS:?set KEY_ACCESS_REGISTRY_ADDRESS in .env (deployed KeyAccessRegistry address)}
+      KEY_ACCESS_REGISTRY_ADDRESS: ${KEY_ACCESS_REGISTRY_ADDRESS:-}
     ports:
       # Web app. Host port in the 133xx block (override via WEB_PORT).
       - "${WEB_PORT:-13300}:3000"
