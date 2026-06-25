@@ -1,0 +1,34 @@
+# Never ship host-built artifacts into the image. The builder runs its own
+# `npm install` + `npm run build` on Linux; copying the host node_modules
+# (macOS-native sharp/keccak/next binaries) over them breaks the runtime.
+node_modules
+**/node_modules
+.next
+out
+
+# Deploy toolchain + its synced sources / installed deps (separate pipeline).
+deploy/node_modules
+deploy/contracts
+deploy/artifacts
+deploy/cache
+deploy/ignition/deployments
+
+# Hardhat build output (not needed by the web app).
+artifacts
+cache
+ignition/deployments
+
+# Secrets, local env, VCS, misc.
+secrets
+.env
+.env.*
+!.env.example
+.git
+.gitignore
+*.log
+npm-debug.log*
+infra/besu/networkFiles
+infra/besu/validator-key
+infra/besu/deployer-private-key.txt
+infra/besu/static-nodes.json
+.DS_Store

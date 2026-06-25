@@ -35,6 +35,15 @@
     "**/*.tsx"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "artifacts",
+    "cache",
+    "contracts",
+    "deploy",
+    "evaluation",
+    "ignition",
+    "services",
+    "test",
+    "hardhat.config.ts"
   ]
 }

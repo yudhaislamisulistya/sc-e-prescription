@@ -18,7 +18,10 @@ ENV NEXT_PUBLIC_CHAIN_ID=$NEXT_PUBLIC_CHAIN_ID \
 
 COPY package*.json ./
 
-RUN npm install
+# --legacy-peer-deps: hardhat-toolbox-viem@3 peer-depends on hardhat-gas-reporter@^1
+# while the repo pins @2, so a strict install errors with ERESOLVE. The toolbox is
+# only a dev/test dependency; the web build itself does not use it.
+RUN npm install --legacy-peer-deps
 
 COPY . .
 

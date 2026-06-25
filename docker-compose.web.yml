@@ -1,0 +1,34 @@
+# docker-compose.web.yml
+#
+# STANDALONE UI PROTOTYPE. Builds and runs ONLY the Next.js web app, with NO
+# blockchain (Besu), NO database (Postgres), NO indexer / kms-signer / IPFS. Use
+# this to view the redesigned interface without the contract-deploy pipeline that
+# was blocking the full stack.
+#
+#   docker compose -f docker-compose.web.yml up --build -d
+#   # then open: http://<host>:${WEB_PORT:-13300}
+#
+# Every page renders (they fetch their data client-side, and src/lib/eth.ts
+# degrades gracefully when no contract addresses are configured). On-chain and
+# DB-backed actions are inert in this mode - expected for a display prototype.
+#
+# A distinct project name keeps this isolated from the full docker-compose.yml
+# stack, so the two never clash over container names or volumes.
+name: sc_e_prescription_web
+
+services:
+  web:
+    build:
+      context: .
+      args:
+        # Empty contract addresses on purpose: prototype / display only.
+        NEXT_PUBLIC_CHAIN_ID: "1337"
+    image: sc_e_prescription_web
+    container_name: sc_e_prescription_web
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_CHAIN_ID: "1337"
+    ports:
+      # Host port in the project's 133xx block (override via WEB_PORT).
+      - "${WEB_PORT:-13300}:3000"
+    restart: unless-stopped
