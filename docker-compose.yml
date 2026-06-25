@@ -40,7 +40,7 @@ services:
     command: ["--config-file=/cfg/besu-validator.toml"]
     volumes:
       - ./infra/besu/besu-validator.toml:/cfg/besu-validator.toml:ro
-      - ./infra/besu/genesis.json:/cfg/genesis.json:ro
+      - ./infra/besu/networkFiles/genesis.json:/cfg/genesis.json:ro
       - ./infra/besu/validator-key:/cfg/key:ro
       - besu-validator-data:/data
     ports:
@@ -56,7 +56,7 @@ services:
     command: ["--config-file=/cfg/besu-rpc.toml"]
     volumes:
       - ./infra/besu/besu-rpc.toml:/cfg/besu-rpc.toml:ro
-      - ./infra/besu/genesis.json:/cfg/genesis.json:ro
+      - ./infra/besu/networkFiles/genesis.json:/cfg/genesis.json:ro
       # Static peering: Besu auto-loads static-nodes.json from its data-path
       # (/data/besu-rpc) so this RPC node dials the validator and receives sealed
       # blocks. Generated host-side by `bash infra/besu/generate-keys.sh`
