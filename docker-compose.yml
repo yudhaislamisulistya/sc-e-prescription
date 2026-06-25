@@ -22,6 +22,13 @@
 # password is never placed in an env var or a DATABASE_URL, so it stays out of
 # `docker inspect` and cannot be URL-injection-mangled. Create it before boot:
 #   openssl rand -hex 24 > secrets/pg_password.txt
+#
+# Host ports: published ports use the project's 133xx block (chainId 1337) so the
+# stack does not clash with other services on a shared host. Container ports are
+# unchanged, so internal DNS (besu-rpc:8545, postgres, ...) is unaffected.
+# Override any default in .env if 133xx is also taken:
+#   WEB_PORT=13300  IPFS_GATEWAY_PORT=13301  BESU_RPC_PORT=13302 (loopback)
+#   IPFS_API_PORT=13303 (loopback)  BESU_P2P_PORT=13304  IPFS_CLUSTER_PORT=13305
 # ---------------------------------------------------------------------------
 name: sc_e_prescription
 
@@ -37,7 +44,8 @@ services:
       - ./infra/besu/validator-key:/cfg/key:ro
       - besu-validator-data:/data
     ports:
-      - "30303:30303"
+      # devp2p peering. Host port in the 133xx block (override via BESU_P2P_PORT).
+      - "${BESU_P2P_PORT:-13304}:30303"
     networks: [consortium-net]
     restart: unless-stopped
 
@@ -57,8 +65,10 @@ services:
       - besu-rpc-data:/data
     ports:
       # Loopback-only host bind: reachable by host tooling (Hardhat) but not the
-      # LAN. In-cluster services reach RPC via app-net DNS (besu-rpc:8545).
-      - "127.0.0.1:8545:8545"
+      # LAN. Host port in the 133xx block (override via BESU_RPC_PORT); the
+      # container still listens on 8545 and in-cluster services reach RPC via
+      # app-net DNS (besu-rpc:8545).
+      - "127.0.0.1:${BESU_RPC_PORT:-13302}:8545"
     networks: [consortium-net, app-net]
     depends_on: [besu-validator]
     restart: unless-stopped
@@ -94,8 +104,9 @@ services:
       - ipfs-data:/data/ipfs
     ports:
       # Kubo admin API (5001) is unauthenticated + powerful - loopback only.
-      - "127.0.0.1:5001:5001"
-      - "8080:8080"
+      - "127.0.0.1:${IPFS_API_PORT:-13303}:5001"
+      # Gateway (serves encrypted blobs only). Host port in the 133xx block.
+      - "${IPFS_GATEWAY_PORT:-13301}:8080"
     networks: [app-net]
     restart: unless-stopped
 
@@ -112,7 +123,7 @@ services:
     volumes:
       - ipfs-cluster-data:/data/ipfs-cluster
     ports:
-      - "9094:9094"
+      - "${IPFS_CLUSTER_PORT:-13305}:9094"
     depends_on: [ipfs]
     networks: [app-net]
     secrets: [ipfs_cluster_secret]
@@ -198,7 +209,8 @@ services:
       # key-access/grant reads the patient-wrapped CEK from this registry.
       KEY_ACCESS_REGISTRY_ADDRESS: ${KEY_ACCESS_REGISTRY_ADDRESS:?set KEY_ACCESS_REGISTRY_ADDRESS in .env (deployed KeyAccessRegistry address)}
     ports:
-      - "3000:3000"
+      # Web app. Host port in the 133xx block (override via WEB_PORT).
+      - "${WEB_PORT:-13300}:3000"
     depends_on: [besu-rpc, postgres, redis, indexer]
     networks: [app-net]
     # The app is the only legitimate caller of kms-signer; it presents the shared
