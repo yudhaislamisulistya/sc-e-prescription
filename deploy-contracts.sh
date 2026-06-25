@@ -37,6 +37,12 @@ if [ ! -x node_modules/.bin/hardhat ]; then
   echo "==> npm install (legacy-peer-deps)"
   npm install --legacy-peer-deps
 fi
+# Hardhat loads the .ts config with ts-node + typescript, which --legacy-peer-deps
+# may skip. Ensure both are present (installed transiently, no package.json churn).
+if [ ! -x node_modules/.bin/ts-node ] || [ ! -d node_modules/typescript ]; then
+  echo "==> installing ts-node + typescript"
+  npm install --legacy-peer-deps --no-save ts-node typescript
+fi
 
 # Admin EOA for the registry (defaults to the deployer address).
 ADMIN="${ADMIN_ADDRESS:-}"
