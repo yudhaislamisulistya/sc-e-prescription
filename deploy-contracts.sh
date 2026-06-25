@@ -41,7 +41,7 @@ fi
 # Admin EOA for the registry (defaults to the deployer address).
 ADMIN="${ADMIN_ADDRESS:-}"
 if [ -z "$ADMIN" ]; then
-  ADMIN="$(node -e 'const {Wallet}=require("ethers");process.stdout.write(new Wallet(process.argv[1]).address)' "$DEPLOYER_PK")"
+  ADMIN="$(node -e 'const {privateKeyToAccount}=require("viem/accounts");process.stdout.write(privateKeyToAccount(process.argv[1]).address)' "$DEPLOYER_PK")"
 fi
 echo "==> admin = $ADMIN"
 echo "==> rpc   = $RPC"
