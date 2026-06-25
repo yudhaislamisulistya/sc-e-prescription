@@ -11,6 +11,18 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+# If Node/npm is not on this host, re-run the WHOLE deploy inside a node:20
+# container. The repo is bind-mounted (so .env / deployed_addresses.json land on
+# the host) and --network host lets it reach besu-rpc on 127.0.0.1. Keeps the
+# host Docker-only - no need to install Node.
+if ! command -v npm >/dev/null 2>&1; then
+  echo "==> npm not found on host - running the deploy inside a node:20 container ..."
+  exec docker run --rm -v "$PWD:/app" -w /app --network host \
+    -e ADMIN_ADDRESS="${ADMIN_ADDRESS:-}" \
+    -e BESU_RPC_URL="${BESU_RPC_URL:-http://127.0.0.1:13302}" \
+    node:20 bash deploy-contracts.sh
+fi
+
 RPC="${BESU_RPC_URL:-http://127.0.0.1:13302}"
 DEPLOYER_FILE="infra/besu/deployer-private-key.txt"
 
