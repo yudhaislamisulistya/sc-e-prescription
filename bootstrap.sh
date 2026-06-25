@@ -42,6 +42,5 @@ bash infra/besu/generate-keys.sh
 echo
 echo "Setup complete. Next:"
 echo "  docker compose up -d            # phase 1: infra (besu, postgres, redis, ipfs)"
-echo "  # deploy contracts (see DEPLOY.md), then in .env set the *_REGISTRY_ADDRESS"
-echo "  # values and COMPOSE_PROFILES=app"
+echo "  bash deploy-contracts.sh        # deploy contracts + auto-fill .env"
 echo "  docker compose up --build -d    # phase 2: app tier (indexer, kms-signer, web)"
