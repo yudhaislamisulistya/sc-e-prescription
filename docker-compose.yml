@@ -35,7 +35,7 @@ name: sc_e_prescription
 services:
   # --- Blockchain: sealing validator (no public RPC) --------------------------
   besu-validator:
-    image: hyperledger/besu:24.10
+    image: hyperledger/besu:24.10.0
     container_name: sc_e_prescription_besu_validator
     command: ["--config-file=/cfg/besu-validator.toml"]
     volumes:
@@ -51,7 +51,7 @@ services:
 
   # --- Blockchain: JSON-RPC member node (free-gas, app-facing) ----------------
   besu-rpc:
-    image: hyperledger/besu:24.10
+    image: hyperledger/besu:24.10.0
     container_name: sc_e_prescription_besu_rpc
     command: ["--config-file=/cfg/besu-rpc.toml"]
     volumes:
