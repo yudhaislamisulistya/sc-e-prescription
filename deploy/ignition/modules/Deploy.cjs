@@ -1,8 +1,9 @@
-// ignition/modules/Deploy.cjs
+// deploy/ignition/modules/Deploy.cjs
 //
-// CommonJS twin of Deploy.ts, used by deploy-contracts.sh so the deploy needs no
-// ts-node. Same module name ("EPrescriptionSystem") and contract IDs, so the
-// deployed_addresses.json keys are identical.
+// Ignition module deploying the three registries in dependency order. The module
+// name ("EPrescriptionSystem") and contract IDs match the app's Deploy.ts, so the
+// resulting deployed_addresses.json keys are identical
+// (EPrescriptionSystem#IdentityRegistry, ...#PrescriptionRegistry, ...#KeyAccessRegistry).
 const { buildModule } = require("@nomicfoundation/hardhat-ignition/modules");
 
 module.exports = buildModule("EPrescriptionSystem", (m) => {

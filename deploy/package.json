@@ -1,0 +1,17 @@
+{
+  "name": "sc-e-prescription-deploy",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Isolated, minimal toolchain that deploys the three registries to Besu. Has its OWN committed package-lock.json so the server runs `npm ci` (deterministic, no peer-dep resolution) instead of resolving the heavy app dependency tree.",
+  "scripts": {
+    "deploy": "hardhat --config hardhat.config.cjs ignition deploy ignition/modules/Deploy.cjs --network besu --parameters ignition/params.json"
+  },
+  "dependencies": {
+    "@nomicfoundation/hardhat-ignition": "^0.15.9",
+    "@nomicfoundation/hardhat-verify": "^2.0.12",
+    "@openzeppelin/contracts": "^5.6.1",
+    "dotenv": "^16.5.0",
+    "hardhat": "^2.24.0",
+    "viem": "^2.29.2"
+  }
+}

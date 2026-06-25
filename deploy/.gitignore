@@ -1,0 +1,9 @@
+# Synced from the repo-root ./contracts at deploy time (single source of truth).
+/contracts/
+# Hardhat build + Ignition deployment artifacts.
+/artifacts/
+/cache/
+/ignition/deployments/
+/ignition/params.json
+# Installed by `npm ci` on the server.
+/node_modules/

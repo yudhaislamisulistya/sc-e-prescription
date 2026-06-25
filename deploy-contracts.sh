@@ -5,11 +5,19 @@
 # into .env (plus COMPOSE_PROFILES=app and the NEXT_PUBLIC_* mirror) so the app
 # tier can start. Run AFTER `docker compose up -d` (infra) is healthy.
 #
+# How it stays reliable (no more peer-dependency whack-a-mole):
+#   * All deploy tooling lives in ./deploy with its OWN committed package-lock.json
+#     (a tiny, fixed dependency tree: hardhat + ignition + openzeppelin + viem).
+#   * We install with `npm ci`, which reproduces that lockfile EXACTLY and never
+#     re-resolves peers - so what passed locally is what runs here.
+#   * The heavy app dependencies (Next.js, web3.storage, ...) are never touched.
+#
 # Optional overrides:
 #   ADMIN_ADDRESS=0x...   admin EOA for the registry (default: the deployer's own)
 #   BESU_RPC_URL=...      RPC endpoint (default: http://127.0.0.1:13302)
 set -euo pipefail
 cd "$(dirname "$0")"
+ROOT="$PWD"
 
 # If Node/npm is not on this host, re-run the WHOLE deploy inside a node:20
 # container. The repo is bind-mounted (so .env / deployed_addresses.json land on
@@ -17,7 +25,7 @@ cd "$(dirname "$0")"
 # host Docker-only - no need to install Node.
 if ! command -v npm >/dev/null 2>&1; then
   echo "==> npm not found on host - running the deploy inside a node:20 container ..."
-  exec docker run --rm -v "$PWD:/app" -w /app --network host \
+  exec docker run --rm -v "$ROOT:/app" -w /app --network host \
     -e ADMIN_ADDRESS="${ADMIN_ADDRESS:-}" \
     -e BESU_RPC_URL="${BESU_RPC_URL:-http://127.0.0.1:13302}" \
     node:20 bash deploy-contracts.sh
@@ -29,23 +37,26 @@ DEPLOYER_FILE="infra/besu/deployer-private-key.txt"
 [ -f "$DEPLOYER_FILE" ] || { echo "ERROR: $DEPLOYER_FILE missing - run ./bootstrap.sh first." >&2; exit 1; }
 DEPLOYER_PK="$(tr -d '[:space:]' < "$DEPLOYER_FILE")"
 
-# hardhat-toolbox-viem@3 peer-depends on hardhat-gas-reporter@^1 while we use @2,
-# so a strict install errors with ERESOLVE; --legacy-peer-deps accepts it (same
-# as the service Dockerfiles). Check for the hardhat binary so a partial install
-# from a failed run is repaired.
+# ---------------------------------------------------------------------------
+# 1) Install the isolated deploy toolchain (deterministic, from the lockfile).
+# ---------------------------------------------------------------------------
+cd "$ROOT/deploy"
 if [ ! -x node_modules/.bin/hardhat ]; then
-  echo "==> npm install (legacy-peer-deps)"
-  npm install --legacy-peer-deps
-fi
-# The minimal CommonJS deploy config (hardhat.config.deploy.cjs) needs only
-# @nomicfoundation/hardhat-ignition - a toolbox peer dep that --legacy-peer-deps
-# does not auto-install. No ts-node / full toolbox required.
-if [ ! -d node_modules/@nomicfoundation/hardhat-ignition ]; then
-  echo "==> installing @nomicfoundation/hardhat-ignition"
-  npm install --legacy-peer-deps --no-save "@nomicfoundation/hardhat-ignition@^0.15.0"
+  echo "==> npm ci (deploy toolchain, from committed lockfile)"
+  npm ci
 fi
 
-# Admin EOA for the registry (defaults to the deployer address).
+# ---------------------------------------------------------------------------
+# 2) Sync the Solidity into ./deploy/contracts (single source of truth lives at
+#    the repo root; Hardhat v2 refuses sources outside its project root).
+# ---------------------------------------------------------------------------
+echo "==> syncing contracts/ -> deploy/contracts/"
+rm -rf contracts
+cp -R "$ROOT/contracts" ./contracts
+
+# ---------------------------------------------------------------------------
+# 3) Admin EOA for the registry (defaults to the deployer address).
+# ---------------------------------------------------------------------------
 ADMIN="${ADMIN_ADDRESS:-}"
 if [ -z "$ADMIN" ]; then
   ADMIN="$(node -e 'const {privateKeyToAccount}=require("viem/accounts");process.stdout.write(privateKeyToAccount(process.argv[1]).address)' "$DEPLOYER_PK")"
@@ -56,9 +67,12 @@ echo "==> rpc   = $RPC"
 mkdir -p ignition
 printf '{ "EPrescriptionSystem": { "adminAddress": "%s" } }\n' "$ADMIN" > ignition/params.json
 
+# ---------------------------------------------------------------------------
+# 4) Deploy via Ignition.
+# ---------------------------------------------------------------------------
 echo "==> Deploying contracts ..."
 echo y | BESU_RPC_URL="$RPC" DEPLOYER_PRIVATE_KEY="$DEPLOYER_PK" \
-  npx hardhat --config hardhat.config.deploy.cjs ignition deploy ignition/modules/Deploy.cjs \
+  npx hardhat --config hardhat.config.cjs ignition deploy ignition/modules/Deploy.cjs \
     --network besu --parameters ignition/params.json
 
 ADDR_JSON="ignition/deployments/chain-1337/deployed_addresses.json"
@@ -79,7 +93,10 @@ echo "==> IdentityRegistry     = $ID"
 echo "==> PrescriptionRegistry = $PR"
 echo "==> KeyAccessRegistry    = $KA"
 
-# Write the values into .env (create from example if missing; update in place).
+# ---------------------------------------------------------------------------
+# 5) Write the values into the repo-root .env (create from example if missing).
+# ---------------------------------------------------------------------------
+cd "$ROOT"
 [ -f .env ] || cp .env.example .env
 set_env() {
   local key="$1" val="$2" tmp
