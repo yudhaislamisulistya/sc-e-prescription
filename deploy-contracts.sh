@@ -22,7 +22,7 @@ DEPLOYER_PK="$(tr -d '[:space:]' < "$DEPLOYER_FILE")"
 # Admin EOA for the registry (defaults to the deployer address).
 ADMIN="${ADMIN_ADDRESS:-}"
 if [ -z "$ADMIN" ]; then
-  ADMIN="$(node -e 'const e=require("ethers");const u=e.utils||e;process.stdout.write(u.computeAddress(process.argv[1]))' "$DEPLOYER_PK")"
+  ADMIN="$(node -e 'const {Wallet}=require("ethers");process.stdout.write(new Wallet(process.argv[1]).address)' "$DEPLOYER_PK")"
 fi
 echo "==> admin = $ADMIN"
 echo "==> rpc   = $RPC"
