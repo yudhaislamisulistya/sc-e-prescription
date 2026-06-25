@@ -92,7 +92,7 @@ export default function DoctorConsole() {
     setResult(null);
     try {
       // 1. prepare
-      setStep("Prepare");
+      setStep("prepare");
       const prepRes = await fetch("/api/prescriptions/prepare", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -109,7 +109,7 @@ export default function DoctorConsole() {
       if (!prepRes.ok) throw new Error(prep.error || "prepare failed");
 
       // 2. sign EIP-712 (uint64 fields as BigInt so the message matches submit's)
-      setStep("Sign");
+      setStep("sign");
       const m = prep.eip712.message;
       const signature = await walletClient().signTypedData({
         account: address,
@@ -129,7 +129,7 @@ export default function DoctorConsole() {
       });
 
       // 3. submit (encrypt + pin + wrap CEK for the patient)
-      setStep("Submit");
+      setStep("submit");
       const subRes = await fetch("/api/prescriptions/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -149,7 +149,7 @@ export default function DoctorConsole() {
       const pub = publicClient();
 
       // 4. issuePrescription on-chain
-      setStep("Issue on-chain");
+      setStep("issueOnChain");
       const issueHash = await wallet.writeContract({
         address: ADDR.prescription!,
         abi: PRESCRIPTION_REGISTRY_ABI,
@@ -161,7 +161,7 @@ export default function DoctorConsole() {
       await pub.waitForTransactionReceipt({ hash: issueHash });
 
       // 5. grantAccess (patient gets their wrapped key)
-      setStep("Grant access");
+      setStep("grantAccess");
       const grantHash = await wallet.writeContract({
         address: ADDR.keyAccess!,
         abi: KEY_ACCESS_REGISTRY_ABI,
@@ -172,11 +172,11 @@ export default function DoctorConsole() {
       });
       await pub.waitForTransactionReceipt({ hash: grantHash });
 
-      setStep("Done");
+      setStep("done");
       setResult({ prescriptionId: prep.prescriptionId, totalUnits: units, cid: sub.cid, payloadHash: sub.payloadHash });
-      toast.success("Prescription issued and anchored on-chain.");
+      toast.success(t("doctor.toast.success"));
     } catch (err) {
-      toast.error((err as Error).message || "Failed to issue prescription.");
+      toast.error((err as Error).message || t("doctor.toast.failed"));
       setStep(null);
     } finally {
       setBusy(false);
@@ -184,40 +184,29 @@ export default function DoctorConsole() {
   }
 
   return (
-    <AppShell role="doctor" active="issue" title="Issue prescription" identity={address ? shortAddr(address) : undefined}>
+    <AppShell role="doctor" active="issue" title={t("doctor.shellTitle")} identity={address ? shortAddr(address) : undefined}>
       <div className="flex items-end justify-between gap-4 mb-6">
         <div>
-          <p className="eyebrow mb-1">Doctor console</p>
-          <h1 className="text-2xl font-semibold tracking-tight">Issue a prescription</h1>
+          <p className="eyebrow mb-1">{t("doctor.eyebrow")}</p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("doctor.title")}</h1>
         </div>
         {!address &&
           (available ? (
             <Button onClick={connect} disabled={connecting}>
-              {connecting ? "Connecting..." : "Connect wallet"}
+              {connecting ? t("common.wallet.connecting") : t("common.wallet.connect")}
             </Button>
           ) : (
-            <span className="text-sm text-muted">No wallet detected</span>
+            <span className="text-sm text-muted">{t("common.wallet.none")}</span>
           ))}
       </div>
-
-      {!configured && (
-        <Card className="p-4 mb-6 border-st-partial/30 bg-st-partial/5">
-          <p className="text-sm text-ink">
-            <span className="font-medium">Contracts not configured.</span> Set{" "}
-            <code className="font-mono text-xs">NEXT_PUBLIC_PRESCRIPTION_REGISTRY_ADDRESS</code> and{" "}
-            <code className="font-mono text-xs">NEXT_PUBLIC_KEY_ACCESS_REGISTRY_ADDRESS</code> after deploying the stack.
-            The form below stays usable for review; on-chain steps are disabled.
-          </p>
-        </Card>
-      )}
 
       <div className="grid lg:grid-cols-12 gap-6">
         {/* form */}
         <Card className="lg:col-span-7 p-6">
           <div className="space-y-4">
             <Field
-              label="Patient reference"
-              hint="The patient's on-chain ref (keccak256 of salt + DID) - never their identity."
+              label={t("doctor.fields.patientRef.label")}
+              hint={t("doctor.fields.patientRef.hint")}
             >
               <Input
                 placeholder="0x..."
@@ -228,27 +217,27 @@ export default function DoctorConsole() {
             </Field>
 
             <div className="grid sm:grid-cols-2 gap-4">
-              <Field label="Medication">
-                <Input placeholder="e.g. Amlodipine 5 mg" value={medName} onChange={(e) => setMedName(e.target.value)} />
+              <Field label={t("doctor.fields.medication.label")}>
+                <Input placeholder={t("doctor.fields.medication.placeholder")} value={medName} onChange={(e) => setMedName(e.target.value)} />
               </Field>
-              <Field label="Total units" hint="Dispensable quantity.">
+              <Field label={t("doctor.fields.totalUnits.label")} hint={t("doctor.fields.totalUnits.hint")}>
                 <Input type="number" min={1} value={totalUnits} onChange={(e) => setTotalUnits(e.target.value)} />
               </Field>
             </div>
 
-            <Field label="Instructions" hint="Encrypted with the prescription - never stored in plaintext.">
+            <Field label={t("doctor.fields.instructions.label")} hint={t("doctor.fields.instructions.hint")}>
               <Textarea
-                placeholder="e.g. One tablet daily, after breakfast."
+                placeholder={t("doctor.fields.instructions.placeholder")}
                 value={instructions}
                 onChange={(e) => setInstructions(e.target.value)}
               />
             </Field>
 
             <div className="grid sm:grid-cols-2 gap-4">
-              <Field label="Refills allowed">
+              <Field label={t("doctor.fields.refills.label")}>
                 <Input type="number" min={0} value={refills} onChange={(e) => setRefills(e.target.value)} />
               </Field>
-              <Field label="Valid until">
+              <Field label={t("doctor.fields.validUntil.label")}>
                 <Input type="datetime-local" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} />
               </Field>
             </div>
@@ -257,9 +246,13 @@ export default function DoctorConsole() {
 
             <div className="flex items-center gap-3 pt-2">
               <Button onClick={handleIssue} disabled={!canSubmit || !!formError}>
-                {busy ? "Working..." : "Sign & issue prescription"}
+                {busy ? t("doctor.buttons.working") : t("doctor.buttons.issue")}
               </Button>
-              {busy && step && <span className="font-mono text-xs text-muted">{step}...</span>}
+              {busy && step && (
+                <span className="font-mono text-xs text-muted">
+                  {t("doctor.stepWorking", { step: t("doctor.steps." + step) })}
+                </span>
+              )}
             </div>
           </div>
         </Card>
@@ -270,7 +263,7 @@ export default function DoctorConsole() {
             <Card className="p-6">
               <div className="flex items-start justify-between mb-5">
                 <div>
-                  <p className="eyebrow">Issued</p>
+                  <p className="eyebrow">{t("doctor.issued.eyebrow")}</p>
                   <p className="font-mono text-sm text-ink mt-1">{shortAddr(result.prescriptionId)}</p>
                 </div>
                 <StatusPill state={1} />
@@ -285,7 +278,7 @@ export default function DoctorConsole() {
             </Card>
           ) : (
             <Card className="p-6">
-              <p className="eyebrow mb-3">What happens on submit</p>
+              <p className="eyebrow mb-3">{t("doctor.side.eyebrow")}</p>
               <ol className="space-y-3">
                 {STEPS.slice(0, 5).map((s, i) => (
                   <li key={s} className="flex items-center gap-3">
@@ -297,14 +290,13 @@ export default function DoctorConsole() {
                     >
                       {i + 1}
                     </span>
-                    <span className={"text-sm " + (step === s ? "text-ink font-medium" : "text-muted")}>{s}</span>
+                    <span className={"text-sm " + (step === s ? "text-ink font-medium" : "text-muted")}>
+                      {t("doctor.steps." + s)}
+                    </span>
                   </li>
                 ))}
               </ol>
-              <p className="mt-5 text-xs text-muted leading-relaxed">
-                The signature commits to the encrypted content&apos;s hash. Only the hash, CID, and lifecycle live
-                on-chain - the prescription body stays encrypted off-chain.
-              </p>
+              <p className="mt-5 text-xs text-muted leading-relaxed">{t("doctor.side.note")}</p>
             </Card>
           )}
         </div>

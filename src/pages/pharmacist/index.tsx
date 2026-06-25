@@ -111,10 +111,10 @@ export default function PharmacistConsole() {
         chain: besuChain,
       });
       await publicClient().waitForTransactionReceipt({ hash });
-      toast.success(`Dispensed ${u} unit(s).`);
+      toast.success(t("pharmacist.toast.dispensed", { n: u }));
       await lookup(rx.id);
     } catch (err) {
-      toast.error((err as Error).message || "Dispense failed.");
+      toast.error((err as Error).message || t("pharmacist.toast.dispenseFailed"));
     } finally {
       setBusy(false);
     }
@@ -122,7 +122,7 @@ export default function PharmacistConsole() {
 
   async function refill() {
     if (!rx) return;
-    if (!address) return toast.warning("Connect your wallet first.");
+    if (!address) return toast.warning(t("pharmacist.toast.connectFirst"));
     setBusy(true);
     try {
       const hash = await walletClient().writeContract({
@@ -134,35 +134,35 @@ export default function PharmacistConsole() {
         chain: besuChain,
       });
       await publicClient().waitForTransactionReceipt({ hash });
-      toast.success("Refilled - units reset, status back to issued.");
+      toast.success(t("pharmacist.toast.refilled"));
       await lookup(rx.id);
     } catch (err) {
-      toast.error((err as Error).message || "Refill failed.");
+      toast.error((err as Error).message || t("pharmacist.toast.refillFailed"));
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <AppShell role="pharmacist" active="dispense" title="Dispense" identity={address ? shortAddr(address) : undefined}>
+    <AppShell role="pharmacist" active="dispense" title={t("pharmacist.title")} identity={address ? shortAddr(address) : undefined}>
       <div className="flex items-end justify-between gap-4 mb-6">
         <div>
-          <p className="eyebrow mb-1">Pharmacist console</p>
-          <h1 className="text-2xl font-semibold tracking-tight">Dispense</h1>
+          <p className="eyebrow mb-1">{t("pharmacist.eyebrow")}</p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("pharmacist.title")}</h1>
         </div>
         {!address &&
           (available ? (
             <Button onClick={connect} disabled={connecting}>
-              {connecting ? "Connecting..." : "Connect wallet"}
+              {connecting ? t("common.wallet.connecting") : t("common.wallet.connect")}
             </Button>
           ) : (
-            <span className="text-sm text-muted">No wallet detected</span>
+            <span className="text-sm text-muted">{t("common.wallet.none")}</span>
           ))}
       </div>
 
       <Card className="p-5 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-end gap-3">
-          <Field label="Prescription id" className="flex-1">
+          <Field label={t("pharmacist.lookup.label")} className="flex-1">
             <Input
               placeholder="0x..."
               value={lookupId}
@@ -172,7 +172,7 @@ export default function PharmacistConsole() {
             />
           </Field>
           <Button variant="secondary" onClick={() => lookup()} disabled={loading}>
-            {loading ? "Looking up..." : "Look up"}
+            {loading ? t("pharmacist.lookup.loading") : t("pharmacist.lookup.button")}
           </Button>
         </div>
       </Card>
@@ -182,7 +182,7 @@ export default function PharmacistConsole() {
           <Card className="lg:col-span-7 p-6">
             <div className="flex items-start justify-between mb-5">
               <div>
-                <p className="eyebrow">Prescription</p>
+                <p className="eyebrow">{t("pharmacist.detail.eyebrow")}</p>
                 <p className="font-mono text-sm text-ink mt-1">{shortAddr(rx.id)}</p>
               </div>
               <StatusPill state={rx.state} />
@@ -196,43 +196,43 @@ export default function PharmacistConsole() {
             />
             <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
               <div>
-                <dt className="eyebrow mb-1">Prescriber</dt>
+                <dt className="eyebrow mb-1">{t("pharmacist.detail.prescriber")}</dt>
                 <dd><MonoChip value={rx.doctor} /></dd>
               </div>
               <div>
-                <dt className="eyebrow mb-1">Patient ref</dt>
+                <dt className="eyebrow mb-1">{t("pharmacist.detail.patientRef")}</dt>
                 <dd><MonoChip value={rx.patientRef} /></dd>
               </div>
               <div>
-                <dt className="eyebrow mb-1">Valid until</dt>
+                <dt className="eyebrow mb-1">{t("pharmacist.detail.validUntil")}</dt>
                 <dd className="text-ink">{new Date(rx.expiresAt * 1000).toLocaleString()}</dd>
               </div>
               <div>
-                <dt className="eyebrow mb-1">Refills</dt>
+                <dt className="eyebrow mb-1">{t("pharmacist.detail.refills")}</dt>
                 <dd className="font-mono text-ink">{rx.refillsUsed} / {rx.refillsAllowed}</dd>
               </div>
             </dl>
           </Card>
 
           <Card className="lg:col-span-5 p-6 h-fit">
-            <p className="eyebrow mb-4">Actions</p>
-            <p className="text-sm text-muted mb-4">{STATE[rx.state].blurb}</p>
+            <p className="eyebrow mb-4">{t("pharmacist.actions.eyebrow")}</p>
+            <p className="text-sm text-muted mb-4">{t(`common.status.${TONE[rx.state]}.blurb`)}</p>
 
             {canDispense ? (
               <div className="space-y-3">
-                <Field label={`Units to dispense (1-${remaining})`}>
+                <Field label={t("pharmacist.actions.unitsLabel", { n: remaining })}>
                   <Input type="number" min={1} max={remaining} value={units} onChange={(e) => setUnits(e.target.value)} />
                 </Field>
                 <Button className="w-full" onClick={dispense} disabled={busy}>
-                  {busy ? "Working..." : "Dispense"}
+                  {busy ? t("pharmacist.actions.working") : t("pharmacist.actions.dispense")}
                 </Button>
               </div>
             ) : canRefill ? (
               <Button className="w-full" onClick={refill} disabled={busy}>
-                {busy ? "Working..." : "Refill prescription"}
+                {busy ? t("pharmacist.actions.working") : t("pharmacist.actions.refill")}
               </Button>
             ) : (
-              <p className="text-sm text-muted">No dispensing action available in this state.</p>
+              <p className="text-sm text-muted">{t("pharmacist.actions.none")}</p>
             )}
           </Card>
         </div>

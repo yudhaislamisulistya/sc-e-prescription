@@ -100,9 +100,9 @@ export default function Dashboard() {
         </div>
       ) : (
         <Card className="p-10 text-center">
-          <p className="text-sm text-ink font-medium">No prescriptions indexed yet</p>
+          <p className="text-sm text-ink font-medium">{t("dashboard.empty.title")}</p>
           <p className="text-sm text-muted mt-1">
-            Issue one from the doctor console, then the indexer will project it here.
+            {t("dashboard.empty.hint")}
           </p>
         </Card>
       )}

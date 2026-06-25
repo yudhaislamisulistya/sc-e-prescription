@@ -72,7 +72,7 @@ export const home = {
         "Sistem e-resep berbasis smart-contract yang dirancang ulang: resep yang ditandatangani dokter, terenkripsi end-to-end, dan terlacak siklus hidupnya pada blockchain konsorsium berizin.",
     },
     brand: {
-      name: "e-Resep",
+      name: "e-Prescription",
       tagline: "Perancangan ulang smart-contract",
     },
     hero: {

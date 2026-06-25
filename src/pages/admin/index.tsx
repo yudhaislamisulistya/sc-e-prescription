@@ -120,78 +120,69 @@ export default function AdminConsole() {
   }
 
   return (
-    <AppShell role="admin" active="actors" title="Registry" identity={address ? shortAddr(address) : undefined}>
+    <AppShell role="admin" active="actors" title={t("admin.title")} identity={address ? shortAddr(address) : undefined}>
       <div className="flex items-end justify-between gap-4 mb-6">
         <div>
-          <p className="eyebrow mb-1">Admin console</p>
-          <h1 className="text-2xl font-semibold tracking-tight">Registry</h1>
+          <p className="eyebrow mb-1">{t("admin.eyebrow")}</p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("admin.title")}</h1>
         </div>
         {!address &&
           (available ? (
             <Button onClick={connect} disabled={connecting}>
-              {connecting ? "Connecting..." : "Connect wallet"}
+              {connecting ? t("common.wallet.connecting") : t("common.wallet.connect")}
             </Button>
           ) : (
-            <span className="text-sm text-muted">No wallet detected</span>
+            <span className="text-sm text-muted">{t("common.wallet.none")}</span>
           ))}
       </div>
-
-      {!configured && (
-        <Card className="p-4 mb-6 border-st-partial/30 bg-st-partial/5">
-          <p className="text-sm text-ink">
-            <span className="font-medium">Contract not configured.</span> Set{" "}
-            <code className="font-mono text-xs">NEXT_PUBLIC_IDENTITY_REGISTRY_ADDRESS</code> after deploying the stack.
-          </p>
-        </Card>
-      )}
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* register actor */}
         <Card className="p-6">
-          <p className="eyebrow mb-4">Register actor</p>
+          <p className="eyebrow mb-4">{t("admin.actor.eyebrow")}</p>
           <div className="space-y-4">
-            <Field label="Actor address">
+            <Field label={t("admin.actor.fields.address.label")}>
               <Input placeholder="0x..." value={actorAddr} onChange={(e) => setActorAddr(e.target.value.trim())} className="font-mono" />
             </Field>
-            <Field label="Role">
+            <Field label={t("admin.actor.fields.role.label")}>
               <select className={selectClass} value={role} onChange={(e) => setRole(e.target.value as keyof typeof ROLE_NAMES)}>
-                <option value="DOCTOR_ROLE">Doctor</option>
-                <option value="PHARMACIST_ROLE">Pharmacist</option>
-                <option value="PATIENT_CUSTODIAN_ROLE">Patient custodian</option>
+                <option value="DOCTOR_ROLE">{t("common.roles.doctor")}</option>
+                <option value="PHARMACIST_ROLE">{t("common.roles.pharmacist")}</option>
+                <option value="PATIENT_CUSTODIAN_ROLE">{t("admin.roles.patientCustodian")}</option>
               </select>
             </Field>
             <div className="grid sm:grid-cols-2 gap-4">
-              <Field label="License hash" hint="bytes32">
+              <Field label={t("admin.actor.fields.licenseHash.label")} hint={t("admin.actor.fields.licenseHash.hint")}>
                 <Input placeholder="0x..." value={licenseHash} onChange={(e) => setLicenseHash(e.target.value.trim())} className="font-mono" />
               </Field>
-              <Field label="Institution id" hint="bytes32">
+              <Field label={t("admin.actor.fields.institutionId.label")} hint={t("admin.actor.fields.institutionId.hint")}>
                 <Input placeholder="0x..." value={institutionId} onChange={(e) => setInstitutionId(e.target.value.trim())} className="font-mono" />
               </Field>
             </div>
-            <Field label="Encryption pubkey" hint="Uncompressed secp256k1 (0x04...), used to wrap keys for this actor.">
+            <Field label={t("admin.actor.fields.pubkey.label")} hint={t("admin.actor.fields.pubkey.hint")}>
               <Input placeholder="0x04..." value={actorPubKey} onChange={(e) => setActorPubKey(e.target.value.trim())} className="font-mono" />
             </Field>
             <Button onClick={registerActor} disabled={busyActor}>
-              {busyActor ? "Working..." : "Register actor"}
+              {busyActor ? t("admin.buttons.working") : t("admin.actor.button")}
             </Button>
           </div>
         </Card>
 
         {/* register patient */}
         <Card className="p-6">
-          <p className="eyebrow mb-4">Register patient</p>
+          <p className="eyebrow mb-4">{t("admin.patient.eyebrow")}</p>
           <div className="space-y-4">
-            <Field label="Patient ref" hint="keccak256(salt, DID) - never the patient's identity.">
+            <Field label={t("admin.patient.fields.ref.label")} hint={t("admin.patient.fields.ref.hint")}>
               <Input placeholder="0x..." value={patientRef} onChange={(e) => setPatientRef(e.target.value.trim())} className="font-mono" />
             </Field>
-            <Field label="Encryption pubkey" hint="The patient's custodial public key.">
+            <Field label={t("admin.patient.fields.pubkey.label")} hint={t("admin.patient.fields.pubkey.hint")}>
               <Input placeholder="0x04..." value={patientPubKey} onChange={(e) => setPatientPubKey(e.target.value.trim())} className="font-mono" />
             </Field>
-            <Field label="Custodian address" hint="The KMS service EOA that re-wraps keys for this patient.">
+            <Field label={t("admin.patient.fields.custodian.label")} hint={t("admin.patient.fields.custodian.hint")}>
               <Input placeholder="0x..." value={custodian} onChange={(e) => setCustodian(e.target.value.trim())} className="font-mono" />
             </Field>
             <Button onClick={registerPatient} disabled={busyPatient}>
-              {busyPatient ? "Working..." : "Register patient"}
+              {busyPatient ? t("admin.buttons.working") : t("admin.patient.button")}
             </Button>
           </div>
         </Card>

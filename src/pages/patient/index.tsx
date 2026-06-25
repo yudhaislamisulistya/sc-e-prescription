@@ -98,7 +98,7 @@ export default function PatientPortal() {
         <div className="grid lg:grid-cols-12 gap-6">
           <div className="lg:col-span-7 space-y-3">
             {list.length === 0 ? (
-              <Card className="p-8 text-center text-sm text-muted">No prescriptions to show.</Card>
+              <Card className="p-8 text-center text-sm text-muted">{t("patient.empty.none")}</Card>
             ) : (
               list.map((rx) => (
                 <RxListItem
@@ -116,7 +116,7 @@ export default function PatientPortal() {
               <Card className="p-6">
                 <div className="flex items-start justify-between mb-5">
                   <div>
-                    <p className="eyebrow">Selected</p>
+                    <p className="eyebrow">{t("patient.selected.eyebrow")}</p>
                     <p className="font-mono text-sm text-ink mt-1">
                       {selected.prescriptionId.slice(0, 6)}...{selected.prescriptionId.slice(-4)}
                     </p>
@@ -131,8 +131,8 @@ export default function PatientPortal() {
                   payloadHash={selected.payloadHash}
                 />
                 <div className="mt-6 pt-5 border-t border-line space-y-3">
-                  <p className="eyebrow">Grant pharmacy access</p>
-                  <Field label="Pharmacy address">
+                  <p className="eyebrow">{t("patient.grant.eyebrow")}</p>
+                  <Field label={t("patient.fields.pharmacyAddr.label")}>
                     <Input
                       placeholder="0x..."
                       value={pharmacy}
@@ -141,15 +141,15 @@ export default function PatientPortal() {
                     />
                   </Field>
                   <Button className="w-full" onClick={grant} disabled={granting}>
-                    {granting ? "Granting..." : "Grant access"}
+                    {granting ? t("patient.buttons.granting") : t("patient.buttons.grant")}
                   </Button>
                   <p className="text-xs text-muted leading-relaxed">
-                    Your custodian re-wraps the key for the pharmacy. The web app never sees your private key.
+                    {t("patient.grant.custodianNote")}
                   </p>
                 </div>
               </Card>
             ) : (
-              <Card className="p-8 text-center text-sm text-muted">Select a prescription to grant access.</Card>
+              <Card className="p-8 text-center text-sm text-muted">{t("patient.empty.selectToGrant")}</Card>
             )}
           </div>
         </div>
