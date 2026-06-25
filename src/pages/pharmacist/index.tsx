@@ -15,9 +15,12 @@ import { LifecycleSpine } from "@/components/ui/LifecycleSpine";
 import { MonoChip } from "@/components/ui/MonoChip";
 import { useWallet } from "@/components/wallet/useWallet";
 import { ADDR, besuChain, publicClient, PRESCRIPTION_REGISTRY_ABI } from "@/lib/eth";
-import { STATE, type StateCode } from "@/components/ui/lifecycle";
+import { type StateCode } from "@/components/ui/lifecycle";
+import { useT } from "@/i18n/I18nProvider";
 
 const BYTES32_RE = /^0x[0-9a-fA-F]{64}$/;
+
+const TONE = { 0: "none", 1: "issued", 2: "partial", 3: "full", 4: "expired", 5: "revoked" } as const;
 
 interface Rx {
   id: `0x${string}`;
@@ -39,6 +42,7 @@ function shortAddr(a: string): string {
 
 export default function PharmacistConsole() {
   const { address, connect, connecting, available, walletClient } = useWallet();
+  const t = useT();
 
   const [lookupId, setLookupId] = useState("");
   const [rx, setRx] = useState<Rx | null>(null);
@@ -53,8 +57,8 @@ export default function PharmacistConsole() {
 
   async function lookup(idArg?: string) {
     const id = (idArg ?? lookupId).trim();
-    if (!BYTES32_RE.test(id)) return toast.warning("Enter a valid prescription id (bytes32).");
-    if (!configured) return toast.error("PRESCRIPTION_REGISTRY address is not configured.");
+    if (!BYTES32_RE.test(id)) return toast.warning(t("pharmacist.toast.invalidId"));
+    if (!configured) return toast.error(t("pharmacist.toast.notConfigured"));
     setLoading(true);
     try {
       const p = await publicClient().readContract({

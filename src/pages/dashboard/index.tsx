@@ -9,17 +9,19 @@ import { Card } from "@/components/ui/Card";
 import { RxListItem, type RxSummary } from "@/components/ui/RxListItem";
 import { cn } from "@/components/ui/cn";
 import { STATE, TONE_CLASS, type StateCode } from "@/components/ui/lifecycle";
+import { useT } from "@/i18n/I18nProvider";
 
-const FILTERS: { label: string; state?: StateCode }[] = [
-  { label: "All" },
-  { label: "Issued", state: 1 },
-  { label: "Partially", state: 2 },
-  { label: "Fully", state: 3 },
-  { label: "Expired", state: 4 },
-  { label: "Revoked", state: 5 },
+const FILTERS: { labelKey: string; state?: StateCode }[] = [
+  { labelKey: "dashboard.filters.all" },
+  { labelKey: "dashboard.filters.issued", state: 1 },
+  { labelKey: "dashboard.filters.partially", state: 2 },
+  { labelKey: "dashboard.filters.fully", state: 3 },
+  { labelKey: "dashboard.filters.expired", state: 4 },
+  { labelKey: "dashboard.filters.revoked", state: 5 },
 ];
 
 export default function Dashboard() {
+  const t = useT();
   const [rows, setRows] = useState<RxSummary[] | null>(null);
   const [filter, setFilter] = useState<StateCode | undefined>(undefined);
   const [loading, setLoading] = useState(false);
@@ -33,22 +35,22 @@ export default function Dashboard() {
       if (!res.ok) throw new Error(data.error || "load failed");
       setRows(data as RxSummary[]);
     } catch (err) {
-      toast.error((err as Error).message || "Could not load (is the read model running?).");
+      toast.error((err as Error).message || t("dashboard.toast.loadError"));
       setRows([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     load(filter);
   }, [filter, load]);
 
   return (
-    <AppShell role="admin" active="ledger" title="Ledger">
+    <AppShell role="admin" active="ledger" title={t("dashboard.shellTitle")}>
       <div className="mb-6">
-        <p className="eyebrow mb-1">Read model</p>
-        <h1 className="text-2xl font-semibold tracking-tight">Prescription ledger</h1>
+        <p className="eyebrow mb-1">{t("dashboard.eyebrow")}</p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("dashboard.title")}</h1>
       </div>
 
       {/* status counts */}
@@ -60,7 +62,7 @@ export default function Dashboard() {
             <Card key={s} className="p-4">
               <div className="flex items-center gap-2">
                 <span className={cn("h-2 w-2 rounded-full", TONE_CLASS[meta.tone].dot)} />
-                <span className="eyebrow">{meta.label}</span>
+                <span className="eyebrow">{t(`common.status.${meta.tone}.label`)}</span>
               </div>
               <p className="font-mono text-2xl text-ink mt-2">{count}</p>
             </Card>

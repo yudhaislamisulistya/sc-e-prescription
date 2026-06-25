@@ -12,6 +12,7 @@
 // connected or the contract addresses are not configured.
 import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
+import { useT } from "@/i18n/I18nProvider";
 import { AppShell } from "@/components/ui/AppShell";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -29,7 +30,8 @@ import {
 
 const BYTES32_RE = /^0x[0-9a-fA-F]{64}$/;
 
-const STEPS = ["Prepare", "Sign", "Submit", "Issue on-chain", "Grant access", "Done"] as const;
+// Step identifiers (stable keys); the user-visible label is t("doctor.steps.<key>").
+const STEPS = ["prepare", "sign", "submit", "issueOnChain", "grantAccess", "done"] as const;
 type Step = (typeof STEPS)[number] | null;
 
 interface IssuedResult {

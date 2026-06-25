@@ -1,0 +1,76 @@
+// src/i18n/messages/pharmacist.ts
+// Pharmacist console strings. Shape: { en: {...}, id: {...} } with identical keys.
+export const pharmacist = {
+  en: {
+    eyebrow: "Pharmacist console",
+    title: "Dispense",
+    lookup: {
+      label: "Prescription id",
+      button: "Look up",
+      loading: "Looking up...",
+    },
+    detail: {
+      eyebrow: "Prescription",
+      prescriber: "Prescriber",
+      patientRef: "Patient ref",
+      validUntil: "Valid until",
+      refills: "Refills",
+    },
+    actions: {
+      eyebrow: "Actions",
+      unitsLabel: "Units to dispense (1-{n})",
+      dispense: "Dispense",
+      refill: "Refill prescription",
+      working: "Working...",
+      none: "No dispensing action available in this state.",
+    },
+    toast: {
+      invalidId: "Enter a valid prescription id (bytes32).",
+      notConfigured: "PRESCRIPTION_REGISTRY address is not configured.",
+      notFound: "No prescription found for that id.",
+      lookupFailed: "Lookup failed (is the RPC reachable?).",
+      dispenseRange: "Enter 1-{n} units.",
+      dispensed: "Dispensed {n} unit(s).",
+      dispenseFailed: "Dispense failed.",
+      refilled: "Refilled - units reset, status back to issued.",
+      refillFailed: "Refill failed.",
+      connectFirst: "Connect your wallet first.",
+    },
+  },
+  id: {
+    eyebrow: "Konsol apoteker",
+    title: "Penyerahan",
+    lookup: {
+      label: "Id resep",
+      button: "Cari",
+      loading: "Mencari...",
+    },
+    detail: {
+      eyebrow: "Resep",
+      prescriber: "Penresep",
+      patientRef: "Ref pasien",
+      validUntil: "Berlaku hingga",
+      refills: "Isi ulang",
+    },
+    actions: {
+      eyebrow: "Tindakan",
+      unitsLabel: "Unit yang diserahkan (1-{n})",
+      dispense: "Serahkan",
+      refill: "Isi ulang resep",
+      working: "Memproses...",
+      none: "Tidak ada tindakan penyerahan yang tersedia pada status ini.",
+    },
+    toast: {
+      invalidId: "Masukkan id resep yang valid (bytes32).",
+      notConfigured: "Alamat PRESCRIPTION_REGISTRY belum dikonfigurasi.",
+      notFound: "Tidak ada resep yang ditemukan untuk id tersebut.",
+      lookupFailed: "Pencarian gagal (apakah RPC dapat dijangkau?).",
+      dispenseRange: "Masukkan 1-{n} unit.",
+      dispensed: "Berhasil menyerahkan {n} unit.",
+      dispenseFailed: "Penyerahan gagal.",
+      refilled: "Berhasil diisi ulang - unit diatur ulang, status kembali ke diterbitkan.",
+      refillFailed: "Isi ulang gagal.",
+      connectFirst: "Hubungkan dompet Anda terlebih dahulu.",
+    },
+  },
+} as const;

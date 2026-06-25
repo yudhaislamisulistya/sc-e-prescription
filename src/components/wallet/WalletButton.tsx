@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/Button";
 import { useWallet } from "./useWallet";
+import { useT } from "@/i18n/I18nProvider";
 
 function shortAddr(a: string): string {
   return `${a.slice(0, 6)}...${a.slice(-4)}`;
@@ -8,6 +9,7 @@ function shortAddr(a: string): string {
 /** Connect / connected-state control for the injected wallet. */
 export function WalletButton() {
   const { address, connect, connecting, available } = useWallet();
+  const t = useT();
 
   if (address) {
     return (
@@ -21,14 +23,14 @@ export function WalletButton() {
   if (!available) {
     return (
       <span className="inline-flex items-center rounded-lg border border-line bg-paper px-3 h-9 text-xs text-muted">
-        No wallet detected
+        {t("common.wallet.none")}
       </span>
     );
   }
 
   return (
     <Button size="sm" onClick={connect} disabled={connecting}>
-      {connecting ? "Connecting..." : "Connect wallet"}
+      {connecting ? t("common.wallet.connecting") : t("common.wallet.connect")}
     </Button>
   );
 }

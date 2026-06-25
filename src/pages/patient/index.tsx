@@ -12,6 +12,7 @@ import { Field, Input } from "@/components/ui/Field";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { LifecycleSpine } from "@/components/ui/LifecycleSpine";
 import { RxListItem, type RxSummary } from "@/components/ui/RxListItem";
+import { useT } from "@/i18n/I18nProvider";
 
 const BYTES32_RE = /^0x[0-9a-fA-F]{64}$/;
 const ADDR_RE = /^0x[0-9a-fA-F]{40}$/;
@@ -22,6 +23,7 @@ interface FullRx extends RxSummary {
 }
 
 export default function PatientPortal() {
+  const t = useT();
   const [patientRef, setPatientRef] = useState("");
   const [list, setList] = useState<FullRx[] | null>(null);
   const [selected, setSelected] = useState<FullRx | null>(null);
@@ -30,7 +32,7 @@ export default function PatientPortal() {
   const [granting, setGranting] = useState(false);
 
   async function load() {
-    if (!BYTES32_RE.test(patientRef)) return toast.warning("Enter a valid patient ref (bytes32).");
+    if (!BYTES32_RE.test(patientRef)) return toast.warning(t("patient.toast.invalidPatientRef"));
     setLoading(true);
     setSelected(null);
     try {
@@ -38,9 +40,9 @@ export default function PatientPortal() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "load failed");
       setList(data as FullRx[]);
-      if (data.length === 0) toast.info("No prescriptions found for that ref yet.");
+      if (data.length === 0) toast.info(t("patient.toast.noneFound"));
     } catch (err) {
-      toast.error((err as Error).message || "Could not load (is the read model running?).");
+      toast.error((err as Error).message || t("patient.toast.loadFailed"));
       setList([]);
     } finally {
       setLoading(false);
@@ -49,7 +51,7 @@ export default function PatientPortal() {
 
   async function grant() {
     if (!selected) return;
-    if (!ADDR_RE.test(pharmacy)) return toast.warning("Enter a valid pharmacy address.");
+    if (!ADDR_RE.test(pharmacy)) return toast.warning(t("patient.toast.invalidPharmacy"));
     setGranting(true);
     try {
       const res = await fetch("/api/key-access/grant", {
@@ -59,10 +61,10 @@ export default function PatientPortal() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || data.detail?.error || "grant failed");
-      toast.success("Pharmacy access granted.");
+      toast.success(t("patient.toast.grantSuccess"));
       setPharmacy("");
     } catch (err) {
-      toast.error((err as Error).message || "Grant failed.");
+      toast.error((err as Error).message || t("patient.toast.grantFailed"));
     } finally {
       setGranting(false);
     }

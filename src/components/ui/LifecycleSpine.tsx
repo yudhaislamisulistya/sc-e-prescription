@@ -1,14 +1,15 @@
 import { cn } from "./cn";
 import { STATE, TONE_CLASS, type StateCode } from "./lifecycle";
 import { MonoChip } from "./MonoChip";
+import { useT } from "@/i18n/I18nProvider";
 
 // The signature element: the on-chain prescription lifecycle made legible -
 // a step track (Issued -> Partially -> Fully), a dispensing meter (N/M units),
 // terminal off-ramps (Expired / Revoked), and the cryptographic integrity chips.
-const FLOW: { code: StateCode; label: string }[] = [
-  { code: 1, label: "Issued" },
-  { code: 2, label: "Partially" },
-  { code: 3, label: "Fully dispensed" },
+const FLOW: { code: StateCode; spineKey: string }[] = [
+  { code: 1, spineKey: "common.spine.issued" },
+  { code: 2, spineKey: "common.spine.partially" },
+  { code: 3, spineKey: "common.spine.fullyDispensed" },
 ];
 
 export function LifecycleSpine({
@@ -24,11 +25,12 @@ export function LifecycleSpine({
   cid?: string;
   payloadHash?: string;
 }) {
+  const t = useT();
   const meta = STATE[state];
   const terminal = state === 4 || state === 5; // EXPIRED / REVOKED
   const activeIndex = state === 1 ? 0 : state === 2 ? 1 : state === 3 ? 2 : -1;
   const pct = totalUnits > 0 ? Math.min(100, Math.round((dispensedUnits / totalUnits) * 100)) : 0;
-  const t = TONE_CLASS[meta.tone];
+  const tone = TONE_CLASS[meta.tone];
 
   return (
     <div className="space-y-5">
@@ -53,7 +55,7 @@ export function LifecycleSpine({
                     reached ? "text-ink" : "text-faint"
                   )}
                 >
-                  {step.label}
+                  {t(step.spineKey)}
                 </span>
               </div>
               {i < FLOW.length - 1 && (
@@ -65,23 +67,23 @@ export function LifecycleSpine({
       </div>
 
       {terminal && (
-        <div className={cn("inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-mono ring-1 ring-inset", t.pill)}>
-          <span className={cn("h-1.5 w-1.5 rounded-full", t.dot)} />
-          {meta.label} - lifecycle ended
+        <div className={cn("inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-mono ring-1 ring-inset", tone.pill)}>
+          <span className={cn("h-1.5 w-1.5 rounded-full", tone.dot)} />
+          {t("common.spine.lifecycleEnded", { label: t(`common.status.${meta.tone}.label`) })}
         </div>
       )}
 
       {/* dispensing meter */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <span className="eyebrow">Dispensed</span>
+          <span className="eyebrow">{t("common.spine.dispensed")}</span>
           <span className="font-mono text-xs text-ink">
             {dispensedUnits}
-            <span className="text-faint"> / {totalUnits} units</span>
+            <span className="text-faint"> / {totalUnits} {t("common.spine.units")}</span>
           </span>
         </div>
         <div className="h-2 rounded-full bg-line overflow-hidden">
-          <div className={cn("h-full rounded-full transition-all", t.bar)} style={{ width: `${pct}%` }} />
+          <div className={cn("h-full rounded-full transition-all", tone.bar)} style={{ width: `${pct}%` }} />
         </div>
       </div>
 
@@ -89,7 +91,7 @@ export function LifecycleSpine({
       {(cid || payloadHash) && (
         <div className="flex flex-wrap items-center gap-2 pt-1">
           <span className="inline-flex items-center gap-1 text-xs text-teal font-medium">
-            <span aria-hidden>◆</span> Integrity anchored
+            <span aria-hidden>◆</span> {t("common.spine.integrityAnchored")}
           </span>
           {payloadHash && <MonoChip label="hash" value={payloadHash} />}
           {cid && <MonoChip label="cid" value={cid} />}

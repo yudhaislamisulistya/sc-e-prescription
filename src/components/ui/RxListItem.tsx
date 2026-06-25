@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Card } from "./Card";
 import { StatusPill } from "./StatusPill";
 import type { StateCode } from "./lifecycle";
+import { useT } from "@/i18n/I18nProvider";
 
 export interface RxSummary {
   prescriptionId: string;
@@ -28,6 +29,7 @@ export function RxListItem({
   onClick?: () => void;
   selected?: boolean;
 }) {
+  const t = useT();
   const pct = rx.totalUnits > 0 ? Math.min(100, Math.round((rx.dispensedUnits / rx.totalUnits) * 100)) : 0;
   return (
     <Card
@@ -45,11 +47,11 @@ export function RxListItem({
             <StatusPill state={rx.state as StateCode} />
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
-            <span className="font-mono">patient {shorten(rx.patientRef)}</span>
+            <span className="font-mono">{t("common.rx.patient")} {shorten(rx.patientRef)}</span>
             <span className="font-mono">
-              {rx.dispensedUnits}/{rx.totalUnits} units
+              {rx.dispensedUnits}/{rx.totalUnits} {t("common.rx.units")}
             </span>
-            <span>exp {new Date(rx.expiresAt * 1000).toLocaleDateString()}</span>
+            <span>{t("common.rx.exp")} {new Date(rx.expiresAt * 1000).toLocaleDateString()}</span>
           </div>
           <div className="mt-2 h-1.5 w-40 rounded-full bg-line overflow-hidden">
             <div className="h-full rounded-full bg-teal" style={{ width: `${pct}%` }} />

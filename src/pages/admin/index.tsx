@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/Field";
 import { useWallet } from "@/components/wallet/useWallet";
 import { ADDR, besuChain, publicClient, IDENTITY_REGISTRY_ABI, ROLE_NAMES, roleHash } from "@/lib/eth";
+import { useT } from "@/i18n/I18nProvider";
 
 const BYTES32_RE = /^0x[0-9a-fA-F]{64}$/;
 const ADDR_RE = /^0x[0-9a-fA-F]{40}$/;
@@ -25,8 +26,15 @@ function shortAddr(a: string): string {
 }
 
 export default function AdminConsole() {
+  const t = useT();
   const { address, connect, connecting, available, walletClient } = useWallet();
   const configured = !!ADDR.identity;
+
+  const roleLabel: Record<keyof typeof ROLE_NAMES, string> = {
+    DOCTOR_ROLE: t("common.roles.doctor"),
+    PHARMACIST_ROLE: t("common.roles.pharmacist"),
+    PATIENT_CUSTODIAN_ROLE: t("admin.roles.patientCustodian"),
+  };
 
   // register actor
   const [actorAddr, setActorAddr] = useState("");
@@ -44,11 +52,11 @@ export default function AdminConsole() {
 
   function guard(): boolean {
     if (!address) {
-      toast.warning("Connect your admin wallet first.");
+      toast.warning(t("admin.toast.connectWallet"));
       return false;
     }
     if (!configured) {
-      toast.error("IDENTITY_REGISTRY address is not configured.");
+      toast.error(t("admin.toast.notConfigured"));
       return false;
     }
     return true;
@@ -56,10 +64,10 @@ export default function AdminConsole() {
 
   async function registerActor() {
     if (!guard()) return;
-    if (!ADDR_RE.test(actorAddr)) return toast.warning("Invalid actor address.");
-    if (!BYTES32_RE.test(licenseHash)) return toast.warning("License hash must be bytes32.");
-    if (!BYTES32_RE.test(institutionId)) return toast.warning("Institution id must be bytes32.");
-    if (!HEX_RE.test(actorPubKey) || actorPubKey.length < 4) return toast.warning("Encryption pubkey must be 0x hex.");
+    if (!ADDR_RE.test(actorAddr)) return toast.warning(t("admin.toast.invalidActor"));
+    if (!BYTES32_RE.test(licenseHash)) return toast.warning(t("admin.toast.licenseBytes32"));
+    if (!BYTES32_RE.test(institutionId)) return toast.warning(t("admin.toast.institutionBytes32"));
+    if (!HEX_RE.test(actorPubKey) || actorPubKey.length < 4) return toast.warning(t("admin.toast.pubkeyHex"));
     setBusyActor(true);
     try {
       const hash = await walletClient().writeContract({
