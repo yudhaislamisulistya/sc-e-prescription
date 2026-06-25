@@ -37,11 +37,12 @@ if [ ! -x node_modules/.bin/hardhat ]; then
   echo "==> npm install (legacy-peer-deps)"
   npm install --legacy-peer-deps
 fi
-# Hardhat loads the .ts config with ts-node + typescript, which --legacy-peer-deps
-# may skip. Ensure both are present (installed transiently, no package.json churn).
-if [ ! -x node_modules/.bin/ts-node ] || [ ! -d node_modules/typescript ]; then
-  echo "==> installing ts-node + typescript"
-  npm install --legacy-peer-deps --no-save ts-node typescript
+# The minimal CommonJS deploy config (hardhat.config.deploy.cjs) needs only
+# @nomicfoundation/hardhat-ignition - a toolbox peer dep that --legacy-peer-deps
+# does not auto-install. No ts-node / full toolbox required.
+if [ ! -d node_modules/@nomicfoundation/hardhat-ignition ]; then
+  echo "==> installing @nomicfoundation/hardhat-ignition"
+  npm install --legacy-peer-deps --no-save "@nomicfoundation/hardhat-ignition@^0.15.0"
 fi
 
 # Admin EOA for the registry (defaults to the deployer address).
@@ -57,7 +58,8 @@ printf '{ "EPrescriptionSystem": { "adminAddress": "%s" } }\n' "$ADMIN" > igniti
 
 echo "==> Deploying contracts ..."
 echo y | BESU_RPC_URL="$RPC" DEPLOYER_PRIVATE_KEY="$DEPLOYER_PK" \
-  npx hardhat ignition deploy ignition/modules/Deploy.ts --network besu --parameters ignition/params.json
+  npx hardhat --config hardhat.config.deploy.cjs ignition deploy ignition/modules/Deploy.cjs \
+    --network besu --parameters ignition/params.json
 
 ADDR_JSON="ignition/deployments/chain-1337/deployed_addresses.json"
 [ -f "$ADDR_JSON" ] || { echo "ERROR: $ADDR_JSON not found (deploy failed)." >&2; exit 1; }
