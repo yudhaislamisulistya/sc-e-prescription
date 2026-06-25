@@ -53,6 +53,7 @@ function shortAddr(a: string): string {
 }
 
 export default function DoctorConsole() {
+  const t = useT();
   const { address, connect, connecting, available, walletClient } = useWallet();
 
   const [patientRef, setPatientRef] = useState("");
@@ -70,10 +71,10 @@ export default function DoctorConsole() {
   const canSubmit = !!address && configured && !busy;
 
   const formError = useMemo(() => {
-    if (patientRef && !BYTES32_RE.test(patientRef)) return "Patient ref must be a 0x bytes32 value.";
-    if (Number(totalUnits) <= 0) return "Total units must be greater than zero.";
+    if (patientRef && !BYTES32_RE.test(patientRef)) return t("doctor.formError.patientRef");
+    if (Number(totalUnits) <= 0) return t("doctor.formError.totalUnits");
     return null;
-  }, [patientRef, totalUnits]);
+  }, [patientRef, totalUnits, t]);
 
   async function handleIssue() {
     if (!address) return toast.warning("Connect your wallet first.");

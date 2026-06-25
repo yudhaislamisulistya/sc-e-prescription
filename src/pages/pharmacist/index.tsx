@@ -69,7 +69,7 @@ export default function PharmacistConsole() {
       });
       if (Number(p.state) === 0) {
         setRx(null);
-        toast.error("No prescription found for that id.");
+        toast.error(t("pharmacist.toast.notFound"));
         return;
       }
       setRx({
@@ -87,7 +87,7 @@ export default function PharmacistConsole() {
       });
       setUnits(String(Number(p.totalUnits) - Number(p.dispensedUnits)));
     } catch (err) {
-      toast.error((err as Error).message || "Lookup failed (is the RPC reachable?).");
+      toast.error((err as Error).message || t("pharmacist.toast.lookupFailed"));
     } finally {
       setLoading(false);
     }

@@ -85,10 +85,10 @@ export default function AdminConsole() {
         chain: besuChain,
       });
       await publicClient().waitForTransactionReceipt({ hash });
-      toast.success(`Registered ${role.replace("_ROLE", "").toLowerCase()}.`);
+      toast.success(t("admin.toast.actorRegistered", { role: roleLabel[role] }));
       setActorAddr("");
     } catch (err) {
-      toast.error((err as Error).message || "registerActor failed.");
+      toast.error((err as Error).message || t("admin.toast.actorFailed"));
     } finally {
       setBusyActor(false);
     }

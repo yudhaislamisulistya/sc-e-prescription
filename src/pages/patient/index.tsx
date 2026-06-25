@@ -71,10 +71,10 @@ export default function PatientPortal() {
   }
 
   return (
-    <AppShell role="patient" active="mine" title="My prescriptions">
+    <AppShell role="patient" active="mine" title={t("patient.title")}>
       <div className="mb-6">
-        <p className="eyebrow mb-1">Patient portal</p>
-        <h1 className="text-2xl font-semibold tracking-tight">My prescriptions</h1>
+        <p className="eyebrow mb-1">{t("patient.eyebrow")}</p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("patient.title")}</h1>
       </div>
 
       <Card className="p-5 mb-6">

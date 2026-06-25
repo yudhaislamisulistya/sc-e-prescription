@@ -76,14 +76,14 @@ export default function Dashboard() {
           const isActive = filter === f.state;
           return (
             <button
-              key={f.label}
+              key={f.labelKey}
               onClick={() => setFilter(f.state)}
               className={cn(
                 "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
                 isActive ? "bg-teal text-white" : "bg-card border border-line text-muted hover:text-ink hover:border-teal"
               )}
             >
-              {f.label}
+              {t(f.labelKey)}
             </button>
           );
         })}
